@@ -24,7 +24,7 @@ import argparse
 import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 
 # ============================================================
 # Token Estimation (rough approximation)
@@ -213,7 +213,7 @@ class ContextCompressor:
                     "breadcrumbs": self.breadcrumbs
                 })),
                 "compressionRate": 0.0,  # Will be calculated
-                "timestamp": datetime.utcnow().isoformat() + "Z"
+                "timestamp": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
             }
         }
 
@@ -308,7 +308,7 @@ def compress_with_handoff(handoff_path: str, from_agent: str, to_agent: str) -> 
         with open(handoff_path, 'w', encoding='utf-8') as f:
             json.dump(handoff, f, indent=2, ensure_ascii=False)
 
-        print(f"✅ Compressed context added to: {handoff_path}")
+        print(f"[OK] Compressed context added to: {handoff_path}")
         print(f"   Compression rate: {compressed['compressionMetadata']['compressionRate']:.1%}")
         print(f"   Original tokens: {compressed['compressionMetadata']['originalTokens']:,}")
         print(f"   Compressed tokens: {compressed['compressionMetadata']['compressedTokens']:,}")
@@ -316,7 +316,7 @@ def compress_with_handoff(handoff_path: str, from_agent: str, to_agent: str) -> 
         return True
 
     except Exception as e:
-        print(f"❌ Error compressing context: {e}", file=sys.stderr)
+        print(f"[ERROR] Error compressing context: {e}", file=sys.stderr)
         return False
 
 
@@ -332,9 +332,13 @@ def compress_file(input_path: str, output_path: str) -> bool:
         True if successful, False otherwise
     """
     try:
-        # Read input file
-        with open(input_path, 'r', encoding='utf-8') as f:
-            conversation = f.read()
+        # Read input file (try UTF-8, fallback to system encoding)
+        try:
+            with open(input_path, 'r', encoding='utf-8') as f:
+                conversation = f.read()
+        except UnicodeDecodeError:
+            with open(input_path, 'r', encoding=sys.getdefaultencoding()) as f:
+                conversation = f.read()
 
         # Compress
         compressor = ContextCompressor()
@@ -344,13 +348,13 @@ def compress_file(input_path: str, output_path: str) -> bool:
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(compressed, f, indent=2, ensure_ascii=False)
 
-        print(f"✅ Compressed: {input_path} → {output_path}")
+        print(f"[OK] Compressed: {input_path} -> {output_path}")
         print(f"   Compression rate: {compressed['compressionMetadata']['compressionRate']:.1%}")
 
         return True
 
     except Exception as e:
-        print(f"❌ Error compressing file: {e}", file=sys.stderr)
+        print(f"[ERROR] Error compressing file: {e}", file=sys.stderr)
         return False
 
 
