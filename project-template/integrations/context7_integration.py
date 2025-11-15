@@ -334,14 +334,14 @@ Best Practices:
 
 def extract_libraries_from_breadcrumbs(breadcrumbs: List[str]) -> List[str]:
     """
-    Extract library names from breadcrumbs
+    Extract library names from breadcrumbs (v2: with word boundary matching)
 
     Args:
         breadcrumbs: List of code references
             e.g., ["import:FastAPI", "class:APIRouter", "function:create_user"]
 
     Returns:
-        List of library names (lowercase)
+        List of library names (lowercase, deduplicated)
         e.g., ["fastapi"]
 
     Examples:
@@ -350,7 +350,40 @@ def extract_libraries_from_breadcrumbs(breadcrumbs: List[str]) -> List[str]:
 
         >>> extract_libraries_from_breadcrumbs(["function:my_function"])
         []
+
+        >>> extract_libraries_from_breadcrumbs(["import:create_engine"])
+        []  # Fixed: no longer matches 'gin' from 'engine'
+
+    Version: 2.0 (P1-4.1)
+    Changes:
+    - Added word boundary matching (fixes 'gin' from 'engine' issue)
+    - Added alias deduplication (postgres/postgresql → postgresql)
+    - Improved multi-word library matching (e.g., 'react-native')
     """
+    import re
+
+    # Library aliases mapping (canonical name)
+    LIBRARY_ALIASES = {
+        'postgres': 'postgresql',
+        'postgresql': 'postgresql',
+        'mui': 'material-ui',
+        'material-ui': 'material-ui',
+        'next': 'nextjs',
+        'nextjs': 'nextjs',
+        'nuxt': 'nuxtjs',
+        'nuxtjs': 'nuxtjs',
+        'k8s': 'kubernetes',
+        'kubernetes': 'kubernetes',
+        'bs4': 'beautifulsoup4',
+        'beautifulsoup4': 'beautifulsoup4',
+        'cv2': 'opencv',
+        'opencv': 'opencv',
+        'sklearn': 'scikit-learn',
+        'scikit-learn': 'scikit-learn',
+        'node': 'nodejs',
+        'nodejs': 'nodejs',
+    }
+
     libraries = set()
 
     for breadcrumb in breadcrumbs:
@@ -359,25 +392,50 @@ def extract_libraries_from_breadcrumbs(breadcrumbs: List[str]) -> List[str]:
 
         breadcrumb_type, identifier = breadcrumb.split(':', 1)
 
-        # Extract from imports
+        # Extract from imports (most reliable)
         if breadcrumb_type in ['import', 'import_from']:
-            # Check against known libraries
             identifier_lower = identifier.lower()
 
-            for lib in Context7Client.SUPPORTED_LIBRARIES:
-                if lib in identifier_lower:
-                    libraries.add(lib)
+            # Sort libraries by length (longest first) to match multi-word libs first
+            # e.g., 'react-native' before 'react'
+            sorted_libs = sorted(Context7Client.SUPPORTED_LIBRARIES,
+                               key=len, reverse=True)
 
-        # Extract from class/function names that contain library names
+            for lib in sorted_libs:
+                # Use word boundary matching to avoid false positives
+                # \b ensures we match whole words only
+                # Special handling for libraries with hyphens (e.g., 'react-native')
+                escaped_lib = re.escape(lib)
+                pattern = rf'\b{escaped_lib}\b'
+
+                if re.search(pattern, identifier_lower):
+                    libraries.add(lib)
+                    # Don't break - continue to find all matches
+                    # e.g., 'react-redux' should match both 'react' and 'redux'
+
+        # Extract from class/function names (less reliable, be more conservative)
         elif breadcrumb_type in ['class', 'function']:
             identifier_lower = identifier.lower()
 
+            # Only check for exact matches or common patterns
             for lib in Context7Client.SUPPORTED_LIBRARIES:
-                # Check if library name appears in identifier
-                if lib in identifier_lower:
+                # Only match if it's a significant part of the identifier
+                # e.g., 'FastAPIRouter' → fastapi, but 'engine' → not gin
+                if identifier_lower.startswith(lib.lower()):
+                    libraries.add(lib)
+                elif identifier_lower.endswith(lib.lower()):
+                    libraries.add(lib)
+                # Check for CamelCase patterns (e.g., 'ReduxStore')
+                elif lib.lower() in identifier_lower.split('_'):
                     libraries.add(lib)
 
-    return sorted(list(libraries))
+    # Deduplicate using aliases
+    canonical_libs = set()
+    for lib in libraries:
+        canonical = LIBRARY_ALIASES.get(lib, lib)
+        canonical_libs.add(canonical)
+
+    return sorted(list(canonical_libs))
 
 
 def extract_query_from_intent(session_intent: List[str], library: str) -> Optional[str]:
