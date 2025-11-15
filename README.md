@@ -1,6 +1,6 @@
 # AI 專案初始化模板 (繁體中文)
 
-**版本**: 4.1 (Critical Revisions - Production Ready)
+**版本**: 0.1 (Critical Revisions - Production Ready)
 **最後更新**: 2025-11-15
 **狀態**: 生產就緒 (核心協議已完成)
 
