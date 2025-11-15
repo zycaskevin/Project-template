@@ -1,0 +1,8 @@
+# AWS Lambda MCP Auto-Compression Server Dependencies
+# Python 3.11
+
+# AWS SDK
+boto3>=1.28.0
+
+# No other dependencies needed!
+# The handler uses only Python stdlib + boto3

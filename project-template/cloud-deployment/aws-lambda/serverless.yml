@@ -1,0 +1,135 @@
+# Serverless Framework Configuration for MCP Auto-Compression Server
+# Deploy to AWS Lambda with HTTP API Gateway
+#
+# Usage:
+#   serverless deploy --stage dev
+#   serverless deploy --stage prod
+#
+# Version: 1.0
+# Author: Claude Code + zycaskevin
+
+service: mcp-auto-compression
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+
+  # Memory & Timeout
+  memorySize: 512  # MB (sufficient for compression tasks)
+  timeout: 30      # seconds (max for API Gateway)
+
+  # Environment Variables
+  environment:
+    STAGE: ${self:provider.stage}
+    TOKEN_THRESHOLD: 70  # 70% of context window
+    CONTEXT_WINDOW: 200000
+    LOG_LEVEL: INFO
+
+  # IAM Role Permissions
+  iam:
+    role:
+      statements:
+        # Allow reading/writing to S3 (for storing compressed handoffs)
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+          Resource:
+            - arn:aws:s3:::${self:custom.bucketName}/*
+
+        # Allow CloudWatch Logs
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource:
+            - arn:aws:logs:*:*:*
+
+# Custom Variables
+custom:
+  bucketName: mcp-compression-${self:provider.stage}
+
+  # Python Requirements Plugin
+  pythonRequirements:
+    dockerizePip: true
+    layer: true
+
+# Functions
+functions:
+  # Main MCP Server Handler
+  mcpServer:
+    handler: handler.mcp_handler
+    description: MCP Server for auto-compression and handoff generation
+    events:
+      # HTTP API Gateway (HTTP API is cheaper than REST API)
+      - httpApi:
+          path: /mcp
+          method: POST
+      - httpApi:
+          path: /mcp/health
+          method: GET
+
+    # Function-specific environment
+    environment:
+      BUCKET_NAME: ${self:custom.bucketName}
+
+  # Compression Handler (separate function for better scaling)
+  compressContext:
+    handler: handler.compress_handler
+    description: Context compression using Factory.ai 2025 strategy
+    events:
+      - httpApi:
+          path: /compress
+          method: POST
+
+    environment:
+      BUCKET_NAME: ${self:custom.bucketName}
+
+  # Handoff Generator
+  generateHandoff:
+    handler: handler.handoff_handler
+    description: Generate Enhanced Handoff Protocol v2.0 JSON
+    events:
+      - httpApi:
+          path: /handoff
+          method: POST
+
+    environment:
+      BUCKET_NAME: ${self:custom.bucketName}
+
+# Resources (S3 Bucket for storing compressed context)
+resources:
+  Resources:
+    CompressionBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        LifecycleConfiguration:
+          Rules:
+            # Auto-delete old compressed files after 30 days
+            - Id: ExpireOldCompression
+              Status: Enabled
+              ExpirationInDays: 30
+
+# Plugins
+plugins:
+  - serverless-python-requirements
+
+# Package Configuration
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!venv/**'
+    - '!.git/**'
+    - '!*.pyc'
+    - '!__pycache__/**'
