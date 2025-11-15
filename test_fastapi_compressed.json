@@ -1,0 +1,108 @@
+{
+  "sessionIntent": [
+    "Implement FastAPI authentication with JWT tokens",
+    "Make sure to follow best practices for security",
+    "Also add refresh token support"
+  ],
+  "playByPlay": [
+    "Step 1: Created file api/auth.py",
+    "Step 2: Created file api/models.py",
+    "Step 3: Created file api/dependencies.py",
+    "Step 4: Modified file api/main.py (added authentication routes)",
+    "Git commits:",
+    "- commit 1: test(TDD-Red): Add authentication tests",
+    "- commit 2: feat(TDD-Green): Implement JWT authentication",
+    "- commit 3: refactor(TDD-Refactor): Extract token creation to utility",
+    "- commit 4: feat(auth): Complete FastAPI JWT authentication",
+    "Created file api/refresh.py with refresh token logic",
+    "Modified api/auth.py to include refresh token generation",
+    "Added database model for token blacklist"
+  ],
+  "artifacts": [
+    "api/auth.py",
+    "api/models.py",
+    "api/dependencies.py",
+    "api/main.py",
+    "api/refresh.py"
+  ],
+  "breadcrumbs": [
+    "import:FastAPI",
+    "import_from:fastapi",
+    "import:OAuth2PasswordBearer",
+    "import_from:fastapi.security",
+    "import:CryptContext",
+    "import_from:passlib.context",
+    "import:JWTError",
+    "import_from:jose",
+    "class:User",
+    "class:Token",
+    "function:create_access_token",
+    "function:login",
+    "async_function:login"
+  ],
+  "compressionMetadata": {
+    "originalTokens": 680,
+    "compressedTokens": 315,
+    "compressionRate": 0.5367647058823529,
+    "timestamp": "2025-11-15T15:43:26.277670Z"
+  },
+  "enhancement": {
+    "context7_docs": [
+      {
+        "library": "fastapi",
+        "version": "latest",
+        "content": "\nFastAPI latest - Modern, fast (high-performance) web framework\n\nKey Features:\n- Automatic API documentation (Swagger UI)\n- Type hints for validation\n- Async support\n- Dependency injection\n\n\n## Authentication\n[Relevant documentation for 'authentication']\n\n\nExample:\n```python\nfrom fastapi import FastAPI, Depends\n\napp = FastAPI()\n\n@app.get(\"/\")\nasync def read_root():\n    return {\"message\": \"Hello World\"}\n```\n\nBest Practices:\n1. Use dependency injection for database connections\n2. Separate routers for different domains\n3. Use Pydantic models for request/response validation\n",
+        "source": "mock",
+        "tokens": 144,
+        "query": "authentication"
+      }
+    ],
+    "total_tokens_added": 297,
+    "libraries_detected": [
+      "fastapi"
+    ],
+    "exa_search": [
+      {
+        "query": "fastapi authentication best practices 2025",
+        "results": [
+          {
+            "title": "FastAPI Authentication Best Practices (2025)",
+            "url": "https://fastapi.tiangolo.com/tutorial/security/",
+            "summary": "Use OAuth2 with Password and Bearer tokens. Implement dependency injection for authentication. Store hashed passwords with bcrypt. Use JWT tokens for stateless authentication.",
+            "score": 0.95
+          },
+          {
+            "title": "Securing FastAPI Applications",
+            "url": "https://testdriven.io/blog/fastapi-security/",
+            "summary": "Implement role-based access control (RBAC). Use API keys for service-to-service communication. Enable CORS properly. Use HTTPS in production.",
+            "score": 0.92
+          },
+          {
+            "title": "FastAPI + JWT Authentication Tutorial",
+            "url": "https://realpython.com/fastapi-jwt/",
+            "summary": "Create access and refresh tokens. Set appropriate expiration times. Use secure secret keys from environment variables. Implement token refresh endpoints.",
+            "score": 0.89
+          }
+        ],
+        "source": "mock",
+        "tokens": 117,
+        "num_results": 3
+      },
+      {
+        "query": "security best practices 2025",
+        "results": [
+          {
+            "title": "Best Practices for security best practices 2025",
+            "url": "https://example.com/best-practices",
+            "summary": "Follow industry standards for security best practices 2025. Use type safety and validation. Write comprehensive tests. Document your code properly.",
+            "score": 0.85
+          }
+        ],
+        "source": "mock",
+        "tokens": 36,
+        "num_results": 1
+      }
+    ],
+    "exa_tokens_added": 153
+  }
+}

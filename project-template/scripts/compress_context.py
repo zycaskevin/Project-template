@@ -8,13 +8,15 @@ Features:
   - Preserve session intent, play-by-play, artifacts, breadcrumbs
   - Generate compressed summary for handoff
   - Estimate token usage
+  - P1-3: Context7 + Exa intelligent enhancement
 
 Usage:
   python compress_context.py --estimate-only
   python compress_context.py --handoff handoff.json --from-agent research --to-agent product
   python compress_context.py --compress --input conversation.txt --output compressed.txt
+  python compress_context.py --compress --input conversation.txt --output compressed.txt --enhance
 
-Version: 1.0
+Version: 1.1 (P1-3: Context7 + Exa Integration)
 Author: Claude Code + zycaskevin
 Based on: Factory.ai 2025 compression strategy
 """
@@ -23,8 +25,22 @@ import json
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from datetime import datetime, timezone
+
+# P1-3: Import integration modules
+try:
+    # Add integrations directory to path
+    integrations_dir = Path(__file__).parent.parent / "integrations"
+    sys.path.insert(0, str(integrations_dir))
+
+    from context7_integration import enhance_with_context7
+    from exa_integration import enhance_with_exa
+
+    INTEGRATIONS_AVAILABLE = True
+except ImportError as e:
+    print(f"[WARNING] Integration modules not available: {e}")
+    INTEGRATIONS_AVAILABLE = False
 
 # ============================================================
 # Token Estimation (enhanced approximation)
@@ -424,13 +440,19 @@ def compress_with_handoff(handoff_path: str, from_agent: str, to_agent: str) -> 
         return False
 
 
-def compress_file(input_path: str, output_path: str) -> bool:
+def compress_file(input_path: str, output_path: str,
+                  use_context7: bool = False,
+                  use_exa: bool = False,
+                  exa_api_key: Optional[str] = None) -> bool:
     """
     Compress a text file using context compression
 
     Args:
         input_path: Input file path
         output_path: Output file path
+        use_context7: Enable Context7 documentation enhancement
+        use_exa: Enable Exa search enhancement
+        exa_api_key: Exa API key (optional)
 
     Returns:
         True if successful, False otherwise
@@ -447,6 +469,27 @@ def compress_file(input_path: str, output_path: str) -> bool:
         # Compress
         compressor = ContextCompressor()
         compressed = compressor.compress(conversation)
+
+        # P1-3: Apply enhancements if requested
+        if (use_context7 or use_exa) and INTEGRATIONS_AVAILABLE:
+            print("[INFO] Applying intelligent enhancements...")
+
+            if use_context7:
+                print("  - Context7: Fetching technical documentation...")
+                compressed = enhance_with_context7(compressed, use_mcp=False)
+                context7_tokens = compressed.get("enhancement", {}).get("total_tokens_added", 0)
+                print(f"    [OK] Added {context7_tokens} tokens from Context7")
+
+            if use_exa:
+                print("  - Exa: Searching for best practices...")
+                compressed = enhance_with_exa(compressed, api_key=exa_api_key, use_api=False)
+                exa_tokens = compressed.get("enhancement", {}).get("exa_tokens_added", 0)
+                print(f"    [OK] Added {exa_tokens} tokens from Exa search")
+
+            total_enhanced_tokens = compressed.get("enhancement", {}).get("total_tokens_added", 0)
+            print(f"  [OK] Total enhancement: +{total_enhanced_tokens} tokens")
+        elif (use_context7 or use_exa) and not INTEGRATIONS_AVAILABLE:
+            print("[WARNING] Enhancement requested but integration modules not available")
 
         # Write compressed output
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -495,7 +538,21 @@ Compression Strategy (Factory.ai 2025):
     parser.add_argument("--input", help="Input file path (for --compress)")
     parser.add_argument("--output", help="Output file path (for --compress)")
 
+    # P1-3: Enhancement options
+    parser.add_argument("--enhance", action="store_true",
+                        help="Enable Context7 + Exa enhancements (shortcut for --use-context7 --use-exa)")
+    parser.add_argument("--use-context7", action="store_true",
+                        help="Enable Context7 documentation enhancement")
+    parser.add_argument("--use-exa", action="store_true",
+                        help="Enable Exa search enhancement")
+    parser.add_argument("--exa-api-key", help="Exa API key (optional, for actual API calls)")
+
     args = parser.parse_args()
+
+    # Handle --enhance shortcut
+    if args.enhance:
+        args.use_context7 = True
+        args.use_exa = True
 
     # Estimate only mode
     if args.estimate_only:
@@ -510,7 +567,10 @@ Compression Strategy (Factory.ai 2025):
 
     # Compress file mode
     if args.compress and args.input and args.output:
-        success = compress_file(args.input, args.output)
+        success = compress_file(args.input, args.output,
+                               use_context7=args.use_context7,
+                               use_exa=args.use_exa,
+                               exa_api_key=args.exa_api_key)
         sys.exit(0 if success else 1)
 
     # No valid mode specified
