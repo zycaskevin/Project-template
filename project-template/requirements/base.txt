@@ -1,0 +1,47 @@
+# AI Project Initialization Template - Dependencies
+# Version: v0.1.1
+# Python: 3.7+
+
+# ============================================================
+# Core Automation Tools
+# ============================================================
+# validate_handoff.py and generate_handoff_template.py
+# use only Python standard library (no external dependencies)
+
+# Required Python version
+# python>=3.7
+
+# ============================================================
+# Optional: Development & Testing (for future extensions)
+# ============================================================
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
+# mypy>=0.950
+
+# ============================================================
+# Optional: Enhanced Features (for future extensions)
+# ============================================================
+# jsonschema>=4.0.0  # For strict JSON Schema validation
+# pyyaml>=6.0        # For YAML configuration support
+# click>=8.0.0       # For enhanced CLI interfaces
+
+# ============================================================
+# Notes
+# ============================================================
+# Current v0.1.1 implementation uses ONLY standard library:
+#   - json (JSON parsing)
+#   - argparse (CLI)
+#   - datetime (timestamps)
+#   - pathlib (path handling)
+#   - hashlib (SHA-256 hashing)
+#
+# No installation required for basic usage!
+#
+# To use this template:
+#   1. Copy project-template/ to your project
+#   2. Run: ./.claude/scripts/init-project.sh
+#   3. Start using validate_handoff.py and generate_handoff_template.py
+#
+# For development contributions:
+#   pip install -r requirements.txt  # (when optional deps are uncommented)
