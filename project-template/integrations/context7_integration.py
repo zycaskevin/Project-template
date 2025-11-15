@@ -22,6 +22,61 @@ from pathlib import Path
 class Context7Client:
     """Client for Context7 MCP server"""
 
+    # ============================================================
+    # Framework Priority Weights (P1-4.2 Feature 1)
+    # ============================================================
+    # Purpose: When token budget is limited, prioritize important frameworks
+    # Weight Scale: 10 (Critical) → 7 (Important) → 5 (Common) → 3 (Niche) → 1 (Optional)
+    FRAMEWORK_PRIORITY = {
+        # Tier 1: Critical Mainstream Frameworks (Weight 10)
+        'react': 10, 'django': 10, 'fastapi': 10, 'vue': 10, 'express': 10,
+        'nextjs': 10, 'flask': 10, 'pytorch': 10, 'tensorflow': 10, 'kubernetes': 10,
+
+        # Tier 2: Important Frameworks (Weight 7-8)
+        'redux': 8, 'angular': 8, 'sqlalchemy': 8, 'pandas': 8, 'numpy': 8,
+        'nestjs': 7, 'nuxtjs': 7, 'gin': 7, 'spring': 7, 'laravel': 7,
+
+        # Tier 3: Common Tools (Weight 5-6)
+        'material-ui': 6, 'tailwindcss': 6, 'pytest': 6, 'jest': 6, 'playwright': 6,
+        'svelte': 5, 'fastify': 5, 'koa': 5, 'gorm': 5, 'scikit-learn': 5,
+
+        # Tier 4: Niche/Specialized (Weight 3)
+        'preact': 3, 'solid': 3, 'hug': 3, 'falcon': 3, 'actix': 3,
+
+        # Tier 5: Optional/Alternative (Weight 1)
+        'alpine': 1, 'backbone': 1, 'web2py': 1, 'turbogears': 1,
+    }
+
+    # ============================================================
+    # Framework Dependencies Graph (P1-4.2 Feature 3)
+    # ============================================================
+    # Purpose: Understand framework relationships (e.g., Redux requires React)
+    FRAMEWORK_DEPENDENCIES = {
+        # React Ecosystem
+        'redux': ['react'],
+        'react-redux': ['react', 'redux'],
+        'react-router': ['react'],
+        'nextjs': ['react'],
+        'gatsby': ['react'],
+        'remix': ['react'],
+
+        # Vue Ecosystem
+        'vuex': ['vue'],
+        'pinia': ['vue'],
+        'nuxtjs': ['vue'],
+
+        # TypeScript
+        'tsc': ['typescript'],
+
+        # Testing
+        'testing-library': ['react'],  # Often used with React
+        'enzyme': ['react'],
+
+        # ORM/Database
+        'tortoise-orm': ['asyncio'],
+        'motor': ['pymongo'],
+    }
+
     # Known libraries that Context7 supports (100+ frameworks)
     SUPPORTED_LIBRARIES = {
         # ============================================================
@@ -436,6 +491,149 @@ def extract_libraries_from_breadcrumbs(breadcrumbs: List[str]) -> List[str]:
         canonical_libs.add(canonical)
 
     return sorted(list(canonical_libs))
+
+
+def extract_version_from_breadcrumbs(breadcrumbs: List[str]) -> Dict[str, str]:
+    """
+    Extract version numbers from breadcrumbs (P1-4.2 Feature 2)
+
+    Args:
+        breadcrumbs: List of code references with potential version info
+            e.g., ["import:fastapi==0.109.0", "import:django>=4.2"]
+
+    Returns:
+        Dict mapping library names to version strings
+        e.g., {"fastapi": "0.109.0", "django": ">=4.2"}
+
+    Examples:
+        >>> extract_version_from_breadcrumbs(["import:fastapi==0.109.0"])
+        {"fastapi": "0.109.0"}
+
+        >>> extract_version_from_breadcrumbs(["import:django>=4.2,<5.0"])
+        {"django": ">=4.2,<5.0"}
+
+    Version: 1.0 (P1-4.2)
+    """
+    import re
+
+    versions = {}
+
+    # Version patterns
+    # Pattern 1: library==1.2.3
+    # Pattern 2: library>=1.2.3
+    # Pattern 3: library~=1.2.3
+    # Pattern 4: library>=1.2.3,<2.0
+    version_pattern = r'([a-z0-9_-]+)(==|>=|<=|~=|>|<)([0-9.]+(?:,[<>=]+[0-9.]+)*)'
+
+    for breadcrumb in breadcrumbs:
+        if ':' not in breadcrumb:
+            continue
+
+        breadcrumb_type, identifier = breadcrumb.split(':', 1)
+
+        if breadcrumb_type in ['import', 'import_from']:
+            # Try to match version pattern
+            match = re.search(version_pattern, identifier.lower())
+            if match:
+                library = match.group(1)
+                operator = match.group(2)
+                version = match.group(3)
+                versions[library] = f"{operator}{version}"
+
+    return versions
+
+
+def sort_libraries_by_priority(libraries: List[str]) -> List[Tuple[str, int]]:
+    """
+    Sort libraries by priority weight (P1-4.2 Feature 1)
+
+    Args:
+        libraries: List of library names
+            e.g., ["react", "redux", "alpine"]
+
+    Returns:
+        List of (library, weight) tuples sorted by weight (descending)
+        e.g., [("react", 10), ("redux", 8), ("alpine", 1)]
+
+    Examples:
+        >>> sort_libraries_by_priority(["react", "redux", "alpine"])
+        [("react", 10), ("redux", 8), ("alpine", 1)]
+
+        >>> sort_libraries_by_priority(["unknown-lib", "fastapi"])
+        [("fastapi", 10), ("unknown-lib", 5)]  # Unknown libs get default weight 5
+
+    Version: 1.0 (P1-4.2)
+    """
+    DEFAULT_PRIORITY = 5  # Unknown libraries get medium priority
+
+    # Create list of (library, priority) tuples
+    lib_priorities = []
+    for lib in libraries:
+        priority = Context7Client.FRAMEWORK_PRIORITY.get(lib, DEFAULT_PRIORITY)
+        lib_priorities.append((lib, priority))
+
+    # Sort by priority (descending)
+    lib_priorities.sort(key=lambda x: x[1], reverse=True)
+
+    return lib_priorities
+
+
+def get_framework_dependencies(library: str) -> List[str]:
+    """
+    Get dependencies for a framework (P1-4.2 Feature 3)
+
+    Args:
+        library: Framework name
+            e.g., "redux"
+
+    Returns:
+        List of dependency framework names
+        e.g., ["react"]
+
+    Examples:
+        >>> get_framework_dependencies("redux")
+        ["react"]
+
+        >>> get_framework_dependencies("react-redux")
+        ["react", "redux"]
+
+        >>> get_framework_dependencies("unknown-lib")
+        []
+
+    Version: 1.0 (P1-4.2)
+    """
+    return Context7Client.FRAMEWORK_DEPENDENCIES.get(library, [])
+
+
+def enrich_libraries_with_dependencies(libraries: List[str]) -> List[str]:
+    """
+    Add missing framework dependencies (P1-4.2 Feature 3)
+
+    Args:
+        libraries: Original library list
+            e.g., ["redux"]
+
+    Returns:
+        Enriched library list with dependencies
+        e.g., ["react", "redux"]  # Added "react" because redux depends on it
+
+    Examples:
+        >>> enrich_libraries_with_dependencies(["redux"])
+        ["react", "redux"]
+
+        >>> enrich_libraries_with_dependencies(["react-redux"])
+        ["react", "react-redux", "redux"]
+
+    Version: 1.0 (P1-4.2)
+    """
+    enriched = set(libraries)
+
+    # Add dependencies
+    for lib in libraries:
+        deps = get_framework_dependencies(lib)
+        enriched.update(deps)
+
+    return sorted(list(enriched))
 
 
 def extract_query_from_intent(session_intent: List[str], library: str) -> Optional[str]:
