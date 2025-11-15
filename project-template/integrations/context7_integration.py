@@ -22,19 +22,149 @@ from pathlib import Path
 class Context7Client:
     """Client for Context7 MCP server"""
 
-    # Known libraries that Context7 supports
+    # Known libraries that Context7 supports (100+ frameworks)
     SUPPORTED_LIBRARIES = {
-        # Python
-        'fastapi', 'django', 'flask', 'sqlalchemy', 'pydantic',
-        'pytest', 'requests', 'numpy', 'pandas', 'sklearn',
-        'tensorflow', 'torch', 'pytorch', 'transformers',
+        # ============================================================
+        # Python Web Frameworks
+        # ============================================================
+        'fastapi', 'django', 'flask', 'pyramid', 'bottle',
+        'tornado', 'aiohttp', 'sanic', 'quart', 'starlette',
+        'cherrypy', 'web2py', 'turbogears', 'falcon', 'hug',
 
-        # JavaScript/TypeScript
-        'react', 'vue', 'angular', 'express', 'next',
-        'typescript', 'node', 'axios', 'jest',
+        # Python Data Science & ML
+        'numpy', 'pandas', 'scipy', 'matplotlib', 'seaborn',
+        'plotly', 'scikit-learn', 'sklearn', 'statsmodels',
+        'tensorflow', 'torch', 'pytorch', 'keras', 'jax',
+        'transformers', 'huggingface', 'lightgbm', 'xgboost',
+        'catboost', 'opencv', 'cv2', 'pillow', 'nltk',
+        'spacy', 'gensim', 'networkx',
 
-        # Other
-        'kubernetes', 'docker', 'terraform', 'aws', 'gcp'
+        # Python Async & Concurrency
+        'asyncio', 'trio', 'curio', 'uvloop', 'gevent',
+        'multiprocessing', 'concurrent', 'celery', 'dramatiq',
+
+        # Python ORM & Database
+        'sqlalchemy', 'peewee', 'tortoise-orm', 'pony',
+        'mongoengine', 'pymongo', 'motor', 'redis-py',
+        'psycopg2', 'aiomysql', 'aiopg',
+
+        # Python Testing
+        'pytest', 'unittest', 'nose2', 'hypothesis', 'tox',
+        'coverage', 'mock', 'faker', 'factory-boy', 'behave',
+
+        # Python Utilities
+        'pydantic', 'marshmallow', 'requests', 'httpx', 'urllib3',
+        'beautifulsoup4', 'bs4', 'lxml', 'click', 'typer',
+        'argparse', 'rich', 'tqdm', 'loguru', 'structlog',
+
+        # ============================================================
+        # JavaScript/TypeScript - Frontend
+        # ============================================================
+        'react', 'vue', 'angular', 'svelte', 'solid',
+        'preact', 'lit', 'alpine', 'ember', 'backbone',
+        'next', 'nextjs', 'nuxt', 'nuxtjs', 'gatsby',
+        'remix', 'astro', 'qwik', 'vite',
+
+        # JavaScript/TypeScript - State Management
+        'redux', 'mobx', 'zustand', 'recoil', 'jotai',
+        'xstate', 'valtio', 'pinia', 'vuex',
+
+        # JavaScript/TypeScript - UI Libraries
+        'mui', 'material-ui', 'antd', 'chakra-ui', 'mantine',
+        'tailwindcss', 'bootstrap', 'bulma', 'semantic-ui',
+        'shadcn', 'radix-ui', 'headlessui',
+
+        # JavaScript/TypeScript - Backend
+        'express', 'koa', 'hapi', 'restify', 'fastify',
+        'nestjs', 'adonis', 'loopback', 'sails', 'meteor',
+
+        # JavaScript/TypeScript - Testing
+        'jest', 'vitest', 'mocha', 'chai', 'jasmine',
+        'cypress', 'playwright', 'puppeteer', 'webdriverio',
+        'testing-library', 'enzyme',
+
+        # JavaScript/TypeScript - Build Tools
+        'webpack', 'rollup', 'parcel', 'esbuild', 'turbopack',
+        'babel', 'swc', 'typescript', 'tsc',
+
+        # JavaScript/TypeScript - Utilities
+        'node', 'nodejs', 'axios', 'fetch', 'lodash',
+        'underscore', 'ramda', 'rxjs', 'date-fns', 'moment',
+        'dayjs', 'zod', 'yup', 'joi',
+
+        # ============================================================
+        # Go
+        # ============================================================
+        'gin', 'echo', 'fiber', 'chi', 'gorilla',
+        'gorm', 'beego', 'revel', 'buffalo',
+
+        # ============================================================
+        # Rust
+        # ============================================================
+        'actix-web', 'rocket', 'axum', 'warp', 'tokio',
+        'serde', 'diesel', 'sqlx', 'sea-orm',
+
+        # ============================================================
+        # Java/Kotlin
+        # ============================================================
+        'spring', 'springboot', 'hibernate', 'junit',
+        'mockito', 'gradle', 'maven', 'jackson',
+        'ktor', 'exposed',
+
+        # ============================================================
+        # Ruby
+        # ============================================================
+        'rails', 'sinatra', 'rspec', 'rake', 'sidekiq',
+
+        # ============================================================
+        # PHP
+        # ============================================================
+        'laravel', 'symfony', 'codeigniter', 'yii',
+        'phpunit', 'composer',
+
+        # ============================================================
+        # DevOps & Infrastructure
+        # ============================================================
+        'docker', 'kubernetes', 'k8s', 'helm', 'terraform',
+        'ansible', 'vagrant', 'packer', 'consul', 'vault',
+        'prometheus', 'grafana', 'jenkins', 'gitlab-ci',
+        'circleci', 'github-actions',
+
+        # ============================================================
+        # Cloud Platforms
+        # ============================================================
+        'aws', 'gcp', 'azure', 'cloudflare', 'vercel',
+        'netlify', 'heroku', 'digitalocean', 'railway',
+
+        # ============================================================
+        # Databases
+        # ============================================================
+        'postgresql', 'postgres', 'mysql', 'mongodb', 'redis',
+        'elasticsearch', 'cassandra', 'dynamodb', 'sqlite',
+        'mariadb', 'cockroachdb', 'timescaledb',
+
+        # ============================================================
+        # Mobile
+        # ============================================================
+        'react-native', 'flutter', 'ionic', 'cordova',
+        'expo', 'xamarin', 'nativescript',
+
+        # ============================================================
+        # Desktop
+        # ============================================================
+        'electron', 'tauri', 'qt', 'gtk', 'tkinter',
+
+        # ============================================================
+        # GraphQL & API
+        # ============================================================
+        'graphql', 'apollo', 'relay', 'prisma', 'hasura',
+        'strapi', 'sanity', 'contentful',
+
+        # ============================================================
+        # Real-time & WebSockets
+        # ============================================================
+        'socket.io', 'socketio', 'websocket', 'ws', 'pusher',
+        'ably', 'supabase', 'firebase',
     }
 
     def __init__(self, use_mcp: bool = True):

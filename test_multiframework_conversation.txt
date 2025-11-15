@@ -1,0 +1,101 @@
+User: Build a full-stack application with React frontend and Django backend
+Assistant: I'll help you build a full-stack application. Let me start with the architecture.
+
+User: Use Redux for state management and PostgreSQL for database
+Assistant: Great choices. I'll set up the tech stack.
+
+Step 1: Created file frontend/src/App.tsx (React + TypeScript)
+Step 2: Created file frontend/src/store/index.ts (Redux Toolkit)
+Step 3: Created file backend/settings.py (Django configuration)
+Step 4: Created file backend/models.py (SQLAlchemy models)
+Step 5: Created file docker-compose.yml (Docker + PostgreSQL)
+
+Key decisions made:
+- Decision: Use React with TypeScript
+  Rationale: Type safety and better developer experience
+  Source: React documentation
+
+- Decision: Use Redux Toolkit for state management
+  Rationale: Simplified Redux with less boilerplate
+  Source: Redux Toolkit best practices
+
+- Decision: Use PostgreSQL with TimescaleDB extension
+  Rationale: Time-series data optimization
+  Source: TimescaleDB documentation
+
+Technical implementation:
+
+# Frontend (React + Redux)
+import { configureStore } from '@reduxjs/toolkit'
+import { Provider } from 'react-redux'
+
+const store = configureStore({
+  reducer: {
+    user: userReducer,
+    posts: postsReducer
+  }
+})
+
+function App() {
+  return (
+    <Provider store={store}>
+      <Router>
+        <Routes />
+      </Router>
+    </Provider>
+  )
+}
+
+# Backend (Django + SQLAlchemy)
+from django.db import models
+from sqlalchemy import create_engine
+
+class User(models.Model):
+    username = models.CharField(max_length=100)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+# Database (PostgreSQL + TimescaleDB)
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+CREATE TABLE metrics (
+    time TIMESTAMPTZ NOT NULL,
+    value DOUBLE PRECISION
+);
+SELECT create_hypertable('metrics', 'time');
+
+# DevOps (Docker + Kubernetes)
+FROM node:18-alpine as frontend
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM python:3.11-slim as backend
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+Git commits:
+- commit 1: test(TDD-Red): Add integration tests
+- commit 2: feat(TDD-Green): Implement React frontend
+- commit 3: feat(TDD-Green): Implement Django backend
+- commit 4: feat(DevOps): Add Docker and Kubernetes configs
+
+User: Add Tailwind CSS for styling and Playwright for E2E testing
+Assistant: I'll add Tailwind CSS and Playwright to the stack.
+
+Created file tailwind.config.js
+Created file tests/e2e/login.spec.ts (Playwright tests)
+Modified frontend/src/index.css (Tailwind imports)
+
+Testing strategy:
+- Unit tests: Jest + React Testing Library
+- E2E tests: Playwright
+- API tests: Pytest + FastAPI TestClient
+
+Cost estimate:
+- AWS deployment: ~$50/month
+- Vercel frontend: Free
+- Heroku PostgreSQL: $9/month
+Total: ~$59/month
