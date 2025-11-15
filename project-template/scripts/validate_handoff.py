@@ -191,8 +191,13 @@ def validate_token_limits(data: Dict) -> List[str]:
     return warnings
 
 
-def auto_fix_handoff(data: Dict) -> Tuple[Dict, List[str]]:
-    """Auto-fix missing fields"""
+def auto_fix_handoff(data: Dict, handoff_file_path: str = None) -> Tuple[Dict, List[str]]:
+    """Auto-fix missing fields
+
+    Args:
+        data: Handoff JSON data
+        handoff_file_path: Path to the handoff JSON file (for resolving relative paths)
+    """
     fixes = []
 
     # Auto-complete timestamp if missing
@@ -202,10 +207,19 @@ def auto_fix_handoff(data: Dict) -> Tuple[Dict, List[str]]:
 
     # Auto-complete hash for artifacts
     if "artifacts" in data:
+        # Get handoff directory for resolving relative paths
+        handoff_dir = Path(handoff_file_path).parent.absolute() if handoff_file_path else Path.cwd()
+
         for i, artifact in enumerate(data["artifacts"]):
             if "hash" not in artifact and "path" in artifact:
                 try:
-                    file_path = Path(artifact["path"])
+                    artifact_path = artifact["path"]
+                    file_path = Path(artifact_path)
+
+                    # If path is not absolute, resolve it relative to handoff directory
+                    if not file_path.is_absolute():
+                        file_path = (handoff_dir / artifact_path).resolve()
+
                     if file_path.exists():
                         content = file_path.read_text(encoding="utf-8")
                         artifact["hash"] = f"sha256:{calculate_hash(content)}"
@@ -249,7 +263,7 @@ def validate_handoff_file(file_path: str, auto_fix: bool = False, strict: bool =
 
         # Auto-fix if requested
         if auto_fix:
-            data, fixes = auto_fix_handoff(data)
+            data, fixes = auto_fix_handoff(data, file_path)
             if fixes:
                 print("🔧 Auto-fixes applied:")
                 for fix in fixes:
