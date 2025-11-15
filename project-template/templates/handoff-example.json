@@ -1,0 +1,187 @@
+{
+  "schemaVersion": "2.0.0",
+  "from": {
+    "agentType": "小研",
+    "timestamp": "2025-11-15T10:30:00Z",
+    "stageType": "pre-business.research"
+  },
+  "to": {
+    "agentType": "小市",
+    "requiredContext": [
+      "industryInsights",
+      "competitorAnalysis",
+      "targetPersonas"
+    ],
+    "expectedOutputs": [
+      "gtm-strategy",
+      "pricing-model",
+      "distribution-channels"
+    ]
+  },
+  "summary": {
+    "keyFindings": [
+      "SaaS 市場年增 23% [來源: Gartner 2025 Magic Quadrant]",
+      "Top 3 競爭對手功能缺口: AI 自動化 [來源: 競品分析報告]",
+      "目標客群: 中小企業 IT 主管, 痛點: 整合複雜度高"
+    ],
+    "decisions": [
+      {
+        "decision": "聚焦垂直產業 (醫療/金融)",
+        "rationale": "合規需求高, 願付費用高 3.2x",
+        "source": "docs/research/industry.md#vertical-analysis",
+        "alternatives": [
+          "水平市場 (覆蓋範圍廣但競爭激烈)",
+          "開發者工具 (技術門檻高)"
+        ]
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "目標客群 IT 預算 >50 萬/年",
+        "needsValidation": true,
+        "priority": "high"
+      },
+      {
+        "assumption": "醫療產業合規要求在未來 3 年不會大幅改變",
+        "needsValidation": true,
+        "priority": "medium"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "type": "markdown",
+      "path": "docs/research/industry.md",
+      "sections": [
+        "market-size",
+        "competitive-landscape",
+        "trends",
+        "vertical-analysis"
+      ],
+      "hash": "sha256:a3f5b8c9d2e1f4g7h6i5j8k1l0m3n2o5p8q1r4s7t0u3v6w9x2y5z8"
+    },
+    {
+      "type": "markdown",
+      "path": "docs/research/competitor-analysis.md",
+      "sections": [
+        "competitor-a",
+        "competitor-b",
+        "competitor-c",
+        "swot-analysis"
+      ],
+      "hash": "sha256:b4g6c8d1e3f5g7h9i2j4k6l8m0n2o4p6q8r1s3t5u7v9w1x3y5z7"
+    }
+  ],
+  "metadata": {
+    "tokensUsed": 4200,
+    "fullOutputPath": "data/handoffs/xiaoyan_20251115_103000.json",
+    "compressionRate": 0.85,
+    "protectedContent": [
+      "competitorAnalysis",
+      "targetPersonas",
+      "marketSize"
+    ]
+  },
+  "businessContext": {
+    "industryInsights": [
+      {
+        "finding": "AI 自動化市場 2025-2030 CAGR 28%",
+        "source": "https://www.gartner.com/en/documents/magic-quadrant-2025",
+        "confidence": 0.95
+      },
+      {
+        "finding": "中小企業 SaaS 採用率從 2023 年 45% 增至 2025 年 67%",
+        "source": "https://www.statista.com/saas-adoption-2025",
+        "confidence": 0.92
+      },
+      {
+        "finding": "垂直產業解決方案比水平方案價格高 2.5-3.5x",
+        "source": "docs/research/pricing-analysis.md",
+        "confidence": 0.88
+      }
+    ],
+    "competitorAnalysis": [
+      {
+        "competitor": "Competitor A",
+        "strengths": [
+          "品牌知名度高 (市場份額 35%)",
+          "生態系統完整 (200+ 集成)",
+          "企業級支援 (24/7 客服)"
+        ],
+        "weaknesses": [
+          "價格高 (每用戶 $120/月)",
+          "整合困難 (平均設置時間 6 週)",
+          "缺乏 AI 自動化功能"
+        ],
+        "source": "docs/research/competitor-a.md"
+      },
+      {
+        "competitor": "Competitor B",
+        "strengths": [
+          "低價策略 (每用戶 $30/月)",
+          "快速部署 (1 週內上線)",
+          "開源社群活躍"
+        ],
+        "weaknesses": [
+          "功能陽春 (缺乏進階功能)",
+          "安全性疑慮 (多次數據外洩)",
+          "不支援垂直產業合規"
+        ],
+        "source": "docs/research/competitor-b.md"
+      }
+    ],
+    "targetPersonas": [
+      {
+        "persona": "IT 主管 (醫療產業)",
+        "painPoints": [
+          "整合 10+ 系統 (EMR, HIS, LIS, PACS)",
+          "手動流程耗時 (每月 200+ 小時)",
+          "合規要求高 (HIPAA, GDPR)"
+        ],
+        "goals": [
+          "提升效率 50%+",
+          "降低錯誤率至 <1%",
+          "自動化合規報告"
+        ],
+        "demographics": "35-50 歲, 5-15 年經驗, 管理 5-20 人團隊"
+      },
+      {
+        "persona": "IT 主管 (金融產業)",
+        "painPoints": [
+          "實時數據同步需求",
+          "嚴格審計追蹤",
+          "多地區監管合規 (SEC, MAS, FCA)"
+        ],
+        "goals": [
+          "零停機時間",
+          "完整審計軌跡",
+          "自動化風險監控"
+        ],
+        "demographics": "30-45 歲, 8-20 年經驗, 管理 10-50 人團隊"
+      }
+    ],
+    "marketSize": {
+      "value": "500 億美金 (TAM), 50 億美金 (SAM), 5 億美金 (SOM)",
+      "source": "Gartner Magic Quadrant 2025",
+      "assumptions": [
+        "僅計入企業級 SaaS (排除 SMB)",
+        "僅計入垂直產業解決方案",
+        "排除開源與自建解決方案",
+        "2025-2030 年複合成長率 23%"
+      ]
+    }
+  },
+  "memoryChain": [
+    {
+      "stage": "pre-business",
+      "agents": [
+        "小研"
+      ],
+      "cumulativeSummary": "產業分析完成: SaaS 市場高成長 (CAGR 28%), 競爭激烈但有功能缺口 (AI 自動化), 目標垂直產業 (醫療/金融) 有 3.2x 價格溢價空間。兩大目標 Persona: 醫療 IT 主管 (整合痛點) 與金融 IT 主管 (合規痛點)。",
+      "artifacts": [
+        "docs/research/industry.md",
+        "docs/research/competitor-analysis.md"
+      ]
+    }
+  ]
+}

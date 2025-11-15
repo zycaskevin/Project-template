@@ -1,0 +1,382 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Enhanced Handoff Protocol v2.0",
+  "description": "Agent 間交接協議 (Enhanced with domain-specific extensions and memory chain)",
+  "type": "object",
+  "required": ["schemaVersion", "from", "to", "summary", "artifacts", "metadata"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "2.0.0",
+      "description": "Schema version (must be 2.0.0)"
+    },
+    "from": {
+      "type": "object",
+      "required": ["agentType", "timestamp", "stageType"],
+      "properties": {
+        "agentType": {
+          "type": "string",
+          "enum": ["小秘", "小憶", "小程", "小質", "小查", "小架", "小後", "小界", "小數", "小研", "小市", "小品", "小前", "小策"],
+          "description": "發送 Agent 類型"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "交接時間 (ISO 8601)"
+        },
+        "stageType": {
+          "type": "string",
+          "enum": ["pre-business.research", "pre-business.market", "pre-business.product", "pre-business.design", "sbe", "tdd.red", "tdd.green", "tdd.refactor", "delivery"],
+          "description": "當前工作階段類型"
+        }
+      }
+    },
+    "to": {
+      "type": "object",
+      "required": ["agentType", "requiredContext", "expectedOutputs"],
+      "properties": {
+        "agentType": {
+          "type": "string",
+          "enum": ["小秘", "小憶", "小程", "小質", "小查", "小架", "小後", "小界", "小數", "小研", "小市", "小品", "小前", "小策"],
+          "description": "接收 Agent 類型"
+        },
+        "requiredContext": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "需要的上下文信息 (例: ['industryInsights', 'competitorAnalysis'])",
+          "maxItems": 10
+        },
+        "expectedOutputs": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "期望的輸出 (例: ['gtm-strategy', 'pricing-model'])",
+          "maxItems": 10
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["keyFindings", "decisions"],
+      "properties": {
+        "keyFindings": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "關鍵發現 (每項 <50 tokens)",
+          "maxItems": 5
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["decision", "rationale", "source"],
+            "properties": {
+              "decision": {"type": "string"},
+              "rationale": {"type": "string"},
+              "source": {"type": "string", "description": "來源 (URL, file path, or [ASSUMPTION])"},
+              "alternatives": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "考慮過的替代方案"
+              }
+            }
+          },
+          "description": "關鍵決策"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["assumption", "needsValidation", "priority"],
+            "properties": {
+              "assumption": {"type": "string"},
+              "needsValidation": {"type": "boolean"},
+              "priority": {"type": "string", "enum": ["high", "medium", "low"]}
+            }
+          },
+          "description": "需要驗證的假設"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "path", "sections", "hash"],
+        "properties": {
+          "type": {"type": "string", "enum": ["markdown", "code", "feature", "json", "yaml"]},
+          "path": {"type": "string", "description": "文件路徑"},
+          "sections": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "文件中的關鍵章節"
+          },
+          "hash": {"type": "string", "description": "SHA-256 hash for integrity"}
+        }
+      },
+      "description": "產出的文檔/代碼"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["tokensUsed", "fullOutputPath"],
+      "properties": {
+        "tokensUsed": {"type": "integer", "minimum": 0},
+        "fullOutputPath": {"type": "string"},
+        "compressionRate": {"type": "number", "minimum": 0, "maximum": 1},
+        "protectedContent": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "受保護的內容區塊 (100% 保留)"
+        }
+      }
+    },
+    "businessContext": {
+      "type": "object",
+      "description": "商業階段專屬上下文 (小研 → 小市 → 小品)",
+      "properties": {
+        "industryInsights": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["finding", "source", "confidence"],
+            "properties": {
+              "finding": {"type": "string"},
+              "source": {"type": "string"},
+              "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+            }
+          }
+        },
+        "competitorAnalysis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["competitor", "strengths", "weaknesses", "source"],
+            "properties": {
+              "competitor": {"type": "string"},
+              "strengths": {"type": "array", "items": {"type": "string"}},
+              "weaknesses": {"type": "array", "items": {"type": "string"}},
+              "source": {"type": "string"}
+            }
+          }
+        },
+        "targetPersonas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["persona", "painPoints", "goals"],
+            "properties": {
+              "persona": {"type": "string"},
+              "painPoints": {"type": "array", "items": {"type": "string"}},
+              "goals": {"type": "array", "items": {"type": "string"}},
+              "demographics": {"type": "string"}
+            }
+          }
+        },
+        "marketSize": {
+          "type": "object",
+          "required": ["value", "source"],
+          "properties": {
+            "value": {"type": "string"},
+            "source": {"type": "string"},
+            "assumptions": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    },
+    "productContext": {
+      "type": "object",
+      "description": "產品階段專屬上下文 (小品 → 小架)",
+      "properties": {
+        "functionalRequirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["feature", "priority", "acceptance"],
+            "properties": {
+              "feature": {"type": "string"},
+              "priority": {"type": "string", "enum": ["P0", "P1", "P2", "P3"]},
+              "acceptance": {"type": "string"}
+            }
+          }
+        },
+        "nonFunctionalRequirements": {
+          "type": "object",
+          "properties": {
+            "performance": {
+              "type": "object",
+              "properties": {
+                "metric": {"type": "string"},
+                "target": {"type": "string"},
+                "rationale": {"type": "string"}
+              }
+            },
+            "scalability": {
+              "type": "object",
+              "properties": {
+                "users": {"type": "string"},
+                "growth": {"type": "string"},
+                "timeline": {"type": "string"}
+              }
+            },
+            "security": {
+              "type": "object",
+              "properties": {
+                "requirements": {"type": "array", "items": {"type": "string"}},
+                "compliance": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          }
+        },
+        "technicalConstraints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["constraint", "reason", "impact"],
+            "properties": {
+              "constraint": {"type": "string"},
+              "reason": {"type": "string"},
+              "impact": {"type": "string"}
+            }
+          }
+        },
+        "apiContract": {
+          "type": "object",
+          "properties": {
+            "endpoints": {"type": "array", "items": {"type": "string"}},
+            "schemas": {"type": "object"},
+            "examples": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    },
+    "technicalContext": {
+      "type": "object",
+      "description": "技術階段專屬上下文 (小架 → 小程/小後)",
+      "properties": {
+        "architectureDecisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["decision", "rationale", "tradeoffs"],
+            "properties": {
+              "decision": {"type": "string"},
+              "rationale": {"type": "string"},
+              "tradeoffs": {"type": "string"},
+              "alternatives": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "designPatterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pattern", "usage", "benefits"],
+            "properties": {
+              "pattern": {"type": "string"},
+              "usage": {"type": "string"},
+              "benefits": {"type": "string"}
+            }
+          }
+        },
+        "technicalDebt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item", "severity", "proposedSolution"],
+            "properties": {
+              "item": {"type": "string"},
+              "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+              "proposedSolution": {"type": "string"}
+            }
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["library", "version", "reason"],
+            "properties": {
+              "library": {"type": "string"},
+              "version": {"type": "string"},
+              "reason": {"type": "string"}
+            }
+          }
+        },
+        "testStrategy": {
+          "type": "object",
+          "properties": {
+            "unit": {"type": "string"},
+            "integration": {"type": "string"},
+            "e2e": {"type": "string"},
+            "coverage": {"type": "string"}
+          }
+        }
+      }
+    },
+    "developmentContext": {
+      "type": "object",
+      "description": "開發階段專屬上下文 (小程 → 小質 → 小程)",
+      "properties": {
+        "codeChanges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file", "function", "purpose", "complexity"],
+            "properties": {
+              "file": {"type": "string"},
+              "function": {"type": "string"},
+              "purpose": {"type": "string"},
+              "complexity": {"type": "number"}
+            }
+          }
+        },
+        "testCases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["scenario", "coverage"],
+            "properties": {
+              "scenario": {"type": "string"},
+              "coverage": {"type": "string"},
+              "edgeCases": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "refactoringNeeds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item", "reason", "impact"],
+            "properties": {
+              "item": {"type": "string"},
+              "reason": {"type": "string"},
+              "impact": {"type": "string"}
+            }
+          }
+        },
+        "performanceMetrics": {
+          "type": "object",
+          "properties": {
+            "before": {"type": "string"},
+            "after": {"type": "string"},
+            "target": {"type": "string"}
+          }
+        }
+      }
+    },
+    "memoryChain": {
+      "type": "array",
+      "description": "累積記憶鏈 (從起點到當前的精簡歷史)",
+      "items": {
+        "type": "object",
+        "required": ["stage", "agents", "cumulativeSummary", "artifacts"],
+        "properties": {
+          "stage": {"type": "string"},
+          "agents": {"type": "array", "items": {"type": "string"}},
+          "cumulativeSummary": {"type": "string", "maxLength": 1500},
+          "artifacts": {"type": "array", "items": {"type": "string"}},
+          "extendsFrom": {"type": "string", "description": "繼承自哪個 stage"}
+        }
+      }
+    }
+  }
+}

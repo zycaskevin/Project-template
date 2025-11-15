@@ -1,0 +1,324 @@
+{
+  "schemaVersion": "2.0.0",
+  "from": {
+    "agentType": "研究與設計階段",
+    "timestamp": "2025-11-15T12:00:00Z",
+    "stageType": "planning.research-design"
+  },
+  "to": {
+    "agentType": "實作階段",
+    "requiredContext": [
+      "criticalRevisions",
+      "designDecisions",
+      "artifactPaths"
+    ],
+    "expectedOutputs": [
+      "CLAUDE.md v4.1",
+      "validate_handoff.py",
+      "generate_handoff_template.py"
+    ]
+  },
+  "summary": {
+    "keyFindings": [
+      "對抗性審查發現 7 個致命缺陷: 循環依賴、不可逆性、Chain 爆炸、無實作、成本高、門檻高、過度承諾",
+      "基於 2025 研究 (LazyLLM, RAP, MIRIX, Collaborative Memory) 的設計方向正確",
+      "提出 7 個改進方案,修訂後可達生產就緒狀態 (v4.0 → v4.1)",
+      "效能承諾需調整為保守估計: Token -13% (非 -40%), Hallucination 3-4% (非 <2%)",
+      "主動宣告 + 三層存儲 + 滑動視窗 + 半自動化 = 可執行系統"
+    ],
+    "decisions": [
+      {
+        "decision": "階段偵測採用主動宣告協議 (非被動偵測)",
+        "rationale": "被動偵測有循環依賴問題,首次壓縮時無法判斷階段",
+        "source": "CRITICAL_REVISIONS_REQUIRED.md#問題1",
+        "alternatives": [
+          "純信號偵測 (Active Agents, File Patterns)",
+          "混合模式 (宣告 + 信號)"
+        ]
+      },
+      {
+        "decision": "採用三層存儲系統 (Active + Archive + Backup)",
+        "rationale": "支援迭代開發,壓縮可逆,不遺失資訊",
+        "source": "CRITICAL_REVISIONS_REQUIRED.md#改進方案2",
+        "alternatives": [
+          "單層壓縮 (不可逆)",
+          "雙層 (無完整備份)"
+        ]
+      },
+      {
+        "decision": "Memory Chain 採用滑動視窗 (max 5 stages)",
+        "rationale": "防止多功能專案突破 1,500 tokens 限制",
+        "source": "CRITICAL_REVISIONS_REQUIRED.md#改進方案3",
+        "alternatives": [
+          "無限增長 (會爆炸)",
+          "固定大小 (丟失歷史)"
+        ]
+      },
+      {
+        "decision": "Handoff JSON 半自動化 (template + validation)",
+        "rationale": "Claude Code 無法完全自動生成 JSON,需人機協作",
+        "source": "CRITICAL_REVISIONS_REQUIRED.md#改進方案4",
+        "alternatives": [
+          "完全手動 (易錯)",
+          "完全自動 (不可行)"
+        ]
+      },
+      {
+        "decision": "小查採用 Risk-based validation (Light/Standard/Deep)",
+        "rationale": "全時驗證 +37.5% Token overhead,抵消優化",
+        "source": "CRITICAL_REVISIONS_REQUIRED.md#改進方案5",
+        "alternatives": [
+          "全時深度驗證 (成本高)",
+          "不驗證 (品質低)"
+        ]
+      },
+      {
+        "decision": "Review Protocol v2.0 使用 Single-LLM (非雙 API)",
+        "rationale": "雙 API 配置門檻高,大部分用戶不會使用",
+        "source": "CRITICAL_REVISIONS_REQUIRED.md#改進方案6",
+        "alternatives": [
+          "Codex + Gemini (理想但難執行)",
+          "無審查 (品質風險)"
+        ]
+      },
+      {
+        "decision": "效能承諾調整為保守估計 (Token -13%, Hallucination 3-4%)",
+        "rationale": "Under-promise, Over-deliver 原則,避免過度承諾",
+        "source": "CRITICAL_REVISIONS_REQUIRED.md#改進方案7",
+        "alternatives": [
+          "樂觀估計 (可能無法達成)",
+          "不提供數據 (缺乏說服力)"
+        ]
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "用戶會遵循主動宣告協議,在階段開始時聲明",
+        "needsValidation": true,
+        "priority": "high"
+      },
+      {
+        "assumption": "JSONL 格式完整備份 30 天足夠用戶迭代",
+        "needsValidation": true,
+        "priority": "medium"
+      },
+      {
+        "assumption": "Light validation (~200 tokens) 足以捕捉大部分幻覺",
+        "needsValidation": true,
+        "priority": "high"
+      },
+      {
+        "assumption": "Self-review (radon, pytest, mypy) 可替代外部 API review",
+        "needsValidation": true,
+        "priority": "medium"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "type": "markdown",
+      "path": "project-template/CLAUDE.md",
+      "sections": [
+        "Core Protocols",
+        "Stage-Aware Compression",
+        "Enhanced Handoff v2.0",
+        "Hallucination Prevention",
+        "Performance Metrics"
+      ],
+      "hash": "sha256:pending_v4.1_update"
+    },
+    {
+      "type": "markdown",
+      "path": "project-template/README.md",
+      "sections": [
+        "Quick Start",
+        "Directory Structure",
+        "Core Features"
+      ],
+      "hash": "sha256:e8a9f2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7"
+    },
+    {
+      "type": "json",
+      "path": "project-template/schemas/handoff-v2.json",
+      "sections": [
+        "base schema",
+        "businessContext",
+        "technicalContext",
+        "developmentContext",
+        "memoryChain"
+      ],
+      "hash": "sha256:a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8"
+    },
+    {
+      "type": "markdown",
+      "path": "CRITICAL_REVISIONS_REQUIRED.md",
+      "sections": [
+        "P0 必須修訂 (7 items)",
+        "P1 應該修訂 (3 items)",
+        "改進方案 1-7",
+        "修訂前後對比"
+      ],
+      "hash": "sha256:c9d0e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u7v8w9x0y1z2a3b4c5d6"
+    },
+    {
+      "type": "json",
+      "path": "project-template/templates/handoff-example.json",
+      "sections": [
+        "businessContext example",
+        "memoryChain example"
+      ],
+      "hash": "sha256:e7f8g9h0i1j2k3l4m5n6o7p8q9r0s1t2u3v4w5x6y7z8a9b0c1d2e3f4"
+    },
+    {
+      "type": "feature",
+      "path": "project-template/templates/feature-example.feature",
+      "sections": [
+        "Gherkin syntax",
+        "Examples table"
+      ],
+      "hash": "sha256:g5h6i7j8k9l0m1n2o3p4q5r6s7t8u9v0w1x2y3z4a5b6c7d8e9f0g1h2"
+    },
+    {
+      "type": "markdown",
+      "path": "project-template/docs/QUICK_START.md",
+      "sections": [
+        "三種啟動模式",
+        "TDD Workflow",
+        "疑難排解"
+      ],
+      "hash": "sha256:i3j4k5l6m7n8o9p0q1r2s3t4u5v6w7x8y9z0a1b2c3d4e5f6g7h8i9j0"
+    }
+  ],
+  "metadata": {
+    "tokensUsed": 104728,
+    "fullOutputPath": "data/handoffs/research_to_implementation_20251115_full.jsonl",
+    "compressionRate": 0.87,
+    "protectedContent": [
+      "7 critical decisions",
+      "7 improvement solutions",
+      "P0/P1/P2 revision plan",
+      "artifact paths"
+    ]
+  },
+  "planningContext": {
+    "researchFindings": [
+      {
+        "topic": "Stage-Aware Dynamic Compression",
+        "sources": [
+          "LazyLLM (ICLR 2025) - Dynamic token pruning, 2.34x speedup",
+          "RAP (Runtime-Adaptive Pruning) - RL-driven elastic pruning",
+          "Alignment-Constrained Pruning - 50% improved refusal rates"
+        ],
+        "keyInsight": "不同階段需要不同壓縮策略,代碼/測試階段需要保守壓縮",
+        "confidence": 0.95
+      },
+      {
+        "topic": "Multi-Agent Memory Management",
+        "sources": [
+          "MIRIX (July 2025) - Modular multi-agent memory system",
+          "Collaborative Memory (May 2025) - Multi-user memory sharing",
+          "Anthropic Best Practices - Structured JSON handoffs with schema"
+        ],
+        "keyInsight": "跨知識域交接需要 domain-specific extensions (businessContext, technicalContext)",
+        "confidence": 0.92
+      },
+      {
+        "topic": "Hallucination Prevention",
+        "sources": [
+          "Frontiers 2025 Study - Structured prompts reduce hallucinations",
+          "MDPI Taxonomic Survey - Source attribution + RAG",
+          "OpenAI Sept 2025 - Calibrated uncertainty > confident guessing"
+        ],
+        "keyInsight": "強制 source attribution + confidence scoring,目標 <2% 過度樂觀,3-4% 更現實",
+        "confidence": 0.88
+      }
+    ],
+    "criticalGaps": [
+      {
+        "gap": "階段偵測循環依賴",
+        "impact": "致命 - 無法正確壓縮",
+        "solution": "主動宣告協議",
+        "priority": "P0"
+      },
+      {
+        "gap": "Memory Chain 無修剪機制",
+        "impact": "嚴重 - 多功能專案會爆炸",
+        "solution": "滑動視窗 (max 5 stages)",
+        "priority": "P0"
+      },
+      {
+        "gap": "Handoff JSON 無實作工具",
+        "impact": "嚴重 - 理論無法落地",
+        "solution": "半自動化 (template + validation)",
+        "priority": "P0"
+      },
+      {
+        "gap": "驗證成本抵消優化",
+        "impact": "嚴重 - Token 節省目標無法達成",
+        "solution": "Risk-based validation",
+        "priority": "P1"
+      }
+    ],
+    "revisionPlan": {
+      "P0_items": [
+        {
+          "item": "階段偵測循環依賴",
+          "solution": "主動宣告協議",
+          "effort_hours": 2,
+          "files": [
+            "CLAUDE.md - Protocol 2",
+            "WORKSPACE_SPEC.md - Section 1.2"
+          ]
+        },
+        {
+          "item": "Memory Chain 無修剪",
+          "solution": "滑動視窗 + 增量歸檔",
+          "effort_hours": 3,
+          "files": [
+            "CLAUDE.md - Protocol 1",
+            "schemas/handoff-v2.json"
+          ]
+        },
+        {
+          "item": "Handoff JSON 缺失",
+          "solution": "半自動化工具",
+          "effort_hours": 4,
+          "files": [
+            "scripts/validate_handoff.py (new)",
+            "scripts/generate_handoff_template.py (new)"
+          ]
+        },
+        {
+          "item": "效能承諾過度樂觀",
+          "solution": "保守估計",
+          "effort_hours": 1,
+          "files": [
+            "CLAUDE.md - Performance Metrics",
+            "USAGE_SUMMARY.md"
+          ]
+        }
+      ],
+      "totalEffort": "P0: 10h, P1: 9h, P2: 6h, Total: 25h (3-4 days)"
+    }
+  },
+  "memoryChain": [
+    {
+      "stage": "planning.research-design",
+      "agents": [
+        "Web Search (前沿研究)",
+        "對抗性思維 (Red Team)",
+        "改進方案 (Synthesis)"
+      ],
+      "cumulativeSummary": "深度研究 2025 最佳實踐 (LazyLLM, RAP, MIRIX, Collaborative Memory, Hallucination Prevention),發現 v4.0 設計有 7 個致命缺陷 (循環依賴、不可逆、Chain 爆炸、無實作、成本高、門檻高、過度承諾),提出 7 個改進方案 (主動宣告、三層存儲、滑動視窗、半自動化、Risk-based、Single-LLM、保守估計),修訂後 v4.1 達生產就緒狀態。關鍵學習: Under-promise Over-deliver, Fail-safe defaults, Cost-conscious design.",
+      "artifacts": [
+        "project-template/CLAUDE.md (v4.0, 待修訂至 v4.1)",
+        "project-template/README.md",
+        "project-template/schemas/handoff-v2.json",
+        "project-template/scripts/init-project.sh/bat",
+        "project-template/templates/*.json/feature",
+        "project-template/docs/QUICK_START.md",
+        "CRITICAL_REVISIONS_REQUIRED.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(DIRECTORY_STRUCTURE.txt 2)",
+      "Bash(nul)",
+      "Bash(dir:*)",
+      "Bash(DIRECTORY_STRUCTURE.txt)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git push:*)",
+      "Bash(git init:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
