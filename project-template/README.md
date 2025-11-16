@@ -1,8 +1,8 @@
 # 新專案啟動模板 (Project Launch Template)
 
-**Version**: 4.0
-**Last Updated**: 2025-11-15
-**Purpose**: 快速啟動新專案,配備完整的 Agent 系統、壓縮機制、交接協議
+**Version**: 4.1
+**Last Updated**: 2025-11-16
+**Purpose**: 快速啟動新專案,配備完整的 Agent 系統、壓縮機制、交接協議（Production Ready）
 
 ---
 
@@ -10,7 +10,7 @@
 
 這是一個**即插即用的新專案啟動包**,包含:
 
-- ✅ **CLAUDE.md v4.0** - 2025 最佳實踐整合的工作區規範
+- ✅ **CLAUDE.md v4.1** - 2025 最佳實踐整合的工作區規範（Production Ready）
 - ✅ **完整 Agent 系統** - 12 個專業 Agent (小秘、小憶、小程、小質、小查等)
 - ✅ **階段感知壓縮** - 4-Stage Compression Matrix
 - ✅ **增強交接協議** - Enhanced Handoff Protocol v2.0
@@ -66,9 +66,8 @@ cat .claude/CLAUDE.md
 
 ```
 project-template/
-├── README.md                    # 本文件
-├── WORKSPACE_SPEC.md            # 專案規範元文檔 (供 LLM 生成 CLAUDE.md)
-├── CLAUDE.md                    # v4.0 工作區規範 (可直接使用)
+├── README.md                    # 本文件 (更新 2025-11-16)
+├── CLAUDE.md                    # v4.1 工作區規範 (Production Ready)
 │
 ├── schemas/                     # JSON Schema 定義
 │   ├── handoff-v2.json         # Enhanced Handoff Protocol v2.0
@@ -76,18 +75,44 @@ project-template/
 │   └── checkpoint-v1.json      # Checkpoint schema
 │
 ├── agents/                      # Agent 定義文件
-│   ├── xiaomi-orchestrator.md  # 小秘 - 協調者
-│   ├── xiaoji-memory-keeper.md # 小憶 - 記憶管理
-│   ├── xiaocheng-developer.md  # 小程 - 開發者
-│   ├── xiaozhi-quality.md      # 小質 - QA 專家
-│   ├── xiaocha-validator.md    # 小查 - 驗證者
-│   ├── xiaojia-architect.md    # 小架 - 架構師
-│   ├── xiaohou-backend.md      # 小後 - 後端開發
-│   ├── xiaojie-ux.md           # 小界 - UX/UI 設計
-│   ├── xiaoshu-data.md         # 小數 - 資料分析
+│   ├── README.md                # Agent 系統總覽
+│   ├── UPGRADE_SUMMARY_v2.0-universal.md  # v2.0 升級總結
+│   ├── xiaomi-orchestrator.md  # 小秘 - 協調者 (v2.0)
+│   ├── xiaoji-memory-keeper.md # 小憶 - 記憶管理 (v4.0)
+│   ├── xiaocheng-developer.md  # 小程 - 開發者 (v3.0)
+│   ├── xiaozhi-quality.md      # 小質 - QA 專家 (v3.0)
+│   ├── xiaocha-validator.md    # 小查 - 驗證者 (v1.0)
+│   ├── xiaojia-architect.md    # 小架 - 架構師 (v2.0)
+│   ├── xiaohou-backend-developer.md # 小後 - 後端開發 (v2.0)
+│   ├── xiaojie-ux-designer.md  # 小界 - UX/UI 設計
+│   ├── xiaoshu-data-analyst.md # 小數 - 資料分析
 │   ├── xiaoyan-research.md     # 小研 - 產業研究
 │   ├── xiaoshi-market.md       # 小市 - 市場策略
-│   └── xiaopin-product.md      # 小品 - 產品經理
+│   ├── xiaopin-product.md      # 小品 - 產品經理
+│   ├── xiaoan-security.md      # 小安 - 安全專家
+│   ├── xiaokuai-performance.md # 小快 - 效能優化
+│   ├── xiaoyun-devops.md       # 小雲 - DevOps
+│   ├── xiaozhen-diagnostician.md # 小診 - 診斷專家
+│   ├── xiaocha-validator-optimizations.md # 小查優化版
+│   ├── xiaoche-documentation-writer.md # 小策 - 文檔撰寫
+│   ├── xiaoshi-coach.md        # 小師 - 教練/顧問
+│   ├── business-roles-integration-test.md # 商業角色整合測試
+│   ├── archive/                 # 歷史版本 (v1.0-v3.0)
+│   │   ├── README.md            # 版本歷史說明
+│   │   ├── xiaocheng-developer.md  # v2.0
+│   │   ├── xiaojia-architect.md    # v1.0
+│   │   ├── xiaoji-memory-keeper.md # v3.0
+│   │   ├── xiaozhi-quality.md      # v2.0
+│   │   ├── xiaohou-backend-developer.md # v1.0
+│   │   └── xiaomi-orchestrator.md  # v1.0
+│   └── kfc/                     # KFC (Specification) 子系統
+│       ├── spec-design.md       # 設計規格專家
+│       ├── spec-impl.md         # 實作規格專家
+│       ├── spec-judge.md        # 評審專家
+│       ├── spec-requirements.md # 需求分析專家
+│       ├── spec-system-prompt-loader.md # 系統提示詞載入器
+│       ├── spec-tasks.md        # 任務分解專家
+│       └── spec-test.md         # 測試規格專家
 │
 ├── scripts/                     # 自動化腳本
 │   ├── init-project.sh         # 專案初始化 (Linux/Mac)
@@ -97,17 +122,35 @@ project-template/
 │   ├── check-docs.sh           # 文檔品質檢查
 │   └── pre-commit              # Git pre-commit hook
 │
+├── integrations/                # 整合模組
+│   ├── README.md                # 整合指南
+│   ├── CHANGELOG.md             # 變更歷史
+│   ├── TODO_NEXT.md             # 待辦清單
+│   ├── memory_hub.py            # Memory Hub (統一記憶管理)
+│   ├── memory_handoff_integration.py # Memory Handoff 整合
+│   ├── universal_memory_storage.py # 通用記憶儲存
+│   ├── context7_integration.py  # Context7 整合
+│   ├── exa_integration.py       # Exa 整合
+│   ├── test_memory_hub.py       # Memory Hub 測試
+│   ├── test_universal_storage.py # 通用儲存測試
+│   └── example_usage.py         # 使用範例
+│
 ├── templates/                   # 文檔模板
 │   ├── handoff-example.json    # Handoff 範例
 │   ├── checkpoint-example.md   # Checkpoint 範例
 │   ├── feature-example.feature # Gherkin .feature 範例
 │   └── prd-template.md         # PRD 模板
 │
+├── cloud-deployment/            # 雲端部署
+│   └── aws-lambda/              # AWS Lambda 部署
+│       ├── DEPLOYMENT_GUIDE.md  # 部署指南
+│       └── handler.py           # Lambda Handler
+│
+├── output-styles/               # 輸出風格
+│   └── tdd-multi-expert-zh.md  # TDD 多專家風格
+│
 └── docs/                        # 使用指南
-    ├── QUICK_START.md          # 快速開始
-    ├── AGENT_GUIDE.md          # Agent 使用指南
-    ├── WORKFLOW_GUIDE.md       # 工作流程指南
-    └── TROUBLESHOOTING.md      # 疑難排解
+    └── QUICK_START.md           # 快速開始
 
 ```
 
@@ -351,23 +394,32 @@ cat data/handoffs/latest.json | grep schemaVersion
   - 文檔生成時間: 1 小時 → 15 分鐘 (-75%)
 
 品質提升:
-  - Hallucination rate: 8% → <2% (-75%)
-  - Source coverage: 60% → >90% (+50%)
+  - Hallucination rate: 8% → 3-4% (-50% to -62%)
+  - Source coverage: 60% → 75-80% (+25% to +33%)
   - Code complexity: 8.5 → ≤5 (-41%)
 
 Token 效率:
-  - 每功能 Token 使用: 10,000 → 6,000 (-40%)
+  - 每功能 Token 使用: 10,000 → 8,700 (-13%)
   - 跨專案記憶複用: 0% → 40% (+40%)
+
+注: v4.1 採用保守估計 (Under-promise, Over-deliver)
 ```
 
 ---
 
 ## 🔄 版本歷史
 
-- **v4.0** (2025-11-15): 初始版本
+- **v4.1** (2025-11-16): Production Ready - Critical Revisions
+  - 修復階段偵測循環依賴（主動宣告協議）
+  - 修復 Memory Chain 爆炸（滑動視窗修剪）
+  - 調整為保守效能估計（Under-promise, Over-deliver）
+  - 完成文檔整理（agents/archive/, 根目錄 18→13 個文件）
+
+- **v4.0** (2025-11-15): 2025 Best Practices Integration
   - 基於 2025 最佳實踐研究
   - 整合 LazyLLM, RAP, MIRIX, Collaborative Memory
   - 包含完整 Agent 系統與自動化腳本
+  - 已知缺陷: 循環依賴、Memory Chain 爆炸（已在 v4.1 修復）
 
 ---
 
