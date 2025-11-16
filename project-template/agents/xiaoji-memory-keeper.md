@@ -30,60 +30,9 @@ v4.0 (Universal Storage):
 
 ---
 
-## 🆕 v4.0 新增功能
+## 核心功能（v4.0）
 
-### 1. Universal Storage 整合
-
-**核心改變**: 從硬編碼 `IntelligentMemorySystem` 升級到 `MemoryHub` 包裝器
-
-**舊 API (v3.0)**:
-```python
-from core.memory.intelligent_memory_system import IntelligentMemorySystem
-
-memory = IntelligentMemorySystem(persist_directory="data/vectors/semantic_memory")
-
-# 查詢
-result = memory.query(
-    "AI 標籤 PRD",
-    n_results=5,
-    where={"expert": "xiaocheng"}  # 僅查詢小程的記憶
-)
-```
-
-**新 API (v4.0)**:
-```python
-from integrations.memory_hub import MemoryHub
-from integrations.universal_memory_storage import StorageCapability
-
-# 初始化 MemoryHub
-hub = MemoryHub()
-
-# 檢查儲存能力
-if hub.capability == StorageCapability.FULL:
-    print("✅ EvoMem 可用 - 完整語義搜尋功能")
-else:
-    print("⚠️ EvoMem 不可用 - 降級到 JSON 基礎模式")
-
-# 智能查詢（保留 v3.0 功能）
-result = hub.intelligent_query(
-    query="AI 標籤 PRD",
-    agent_type="xiaocheng",  # 替代 where={"expert": "xiaocheng"}
-    n_results=5
-)
-```
-
-**向後相容**（暫時保留）:
-```python
-# 舊代碼仍可使用（內部轉發到 MemoryHub）
-from integrations.memory_hub import IntelligentMemorySystem
-
-memory = IntelligentMemorySystem()  # 顯示棄用警告
-result = memory.query("TDD 最佳實踐", n_results=5, where={"expert": "xiaocheng"})
-```
-
----
-
-### 2. 智能查詢路由 (Query Routing) - 保留 v3.0 功能
+### 1. 智能查詢路由 (Query Routing)
 
 **核心價值**: 根據 Agent 類型和任務情境，自動優化查詢策略
 
@@ -163,7 +112,7 @@ class QueryRouter:
 
 ---
 
-### 3. 主動推薦系統 (Recommendation System) - 增強版
+### 2. 主動推薦系統 (Recommendation System)
 
 **v4.0 增強**:
 - ✅ 保留 v3.0 的品質評分系統（0-100）
@@ -223,7 +172,7 @@ def calculate_quality_score(memory: Dict) -> int:
 
 ---
 
-### 4. 跨專案記憶搜尋 - 保留 v3.0 功能
+### 3. 跨專案記憶搜尋
 
 **範例**（使用 MemoryHub）:
 
@@ -243,89 +192,6 @@ results = hub.intelligent_query(
 all_results = hub.intelligent_query(
     query="TDD 最佳實踐",
     n_results=10  # 不指定 project，查詢所有專案
-)
-```
-
----
-
-## 🔧 v4.0 升級指南
-
-### 升級步驟
-
-1. **安裝 Universal Storage v2.0.0**（已完成）
-2. **更新 import 語句**
-3. **替換 API 呼叫**
-4. **測試驗證**
-
-### 代碼遷移清單
-
-**Import 語句**:
-```python
-# ❌ v3.0 (舊)
-from core.memory.intelligent_memory_system import IntelligentMemorySystem
-
-# ✅ v4.0 (新)
-from integrations.memory_hub import MemoryHub
-from integrations.universal_memory_storage import StorageCapability
-```
-
-**初始化**:
-```python
-# ❌ v3.0 (舊)
-memory = IntelligentMemorySystem(persist_directory="data/vectors/semantic_memory")
-
-# ✅ v4.0 (新)
-hub = MemoryHub()
-```
-
-**查詢方法**:
-```python
-# ❌ v3.0 (舊)
-results = memory.query(
-    "TDD 最佳實踐",
-    n_results=5,
-    where={"expert": "xiaocheng", "type": "learning"}
-)
-
-# ✅ v4.0 (新) - 推薦方式
-results = hub.intelligent_query(
-    query="TDD 最佳實踐",
-    agent_type="xiaocheng",
-    n_results=5
-)
-# 注意: type 過濾需手動實作（v2.1 將支援 where 參數）
-
-# ✅ v4.0 (新) - 向後相容方式（暫時可用）
-results = hub.query(
-    "TDD 最佳實踐",
-    n_results=5,
-    where={"expert": "xiaocheng"}
-)
-```
-
-**添加記憶**:
-```python
-# ❌ v3.0 (舊)
-memory.add_memory(
-    content="使用 pytest fixture 可提高測試複用性",
-    metadata={
-        "expert": "xiaocheng",
-        "type": "learning",
-        "tags": ["TDD", "pytest"]
-    }
-)
-
-# ✅ v4.0 (新)
-hub.add_memory(
-    content="使用 pytest fixture 可提高測試複用性",
-    expert="xiaocheng",
-    memory_type="learning",
-    tags=["TDD", "pytest"]
-)
-# 或直接傳 metadata（完全相容）
-hub.add_memory(
-    content="...",
-    metadata={"expert": "xiaocheng", "type": "learning", "tags": ["TDD", "pytest"]}
 )
 ```
 
@@ -423,96 +289,6 @@ hub.add_memory(
 
 ---
 
-## 📊 效能與監控（v4.0 新增）
-
-### 使用統計
-
-```python
-hub = MemoryHub()
-
-# 執行一些查詢...
-hub.intelligent_query("TDD", n_results=5)
-hub.intelligent_query("pytest", n_results=3)
-
-# 獲取統計資訊
-stats = hub.get_statistics()
-
-print(f"總查詢次數: {stats['total_queries']}")
-print(f"快取命中率: {stats['cache_hit_rate']:.1%}")
-print(f"平均延遲: {stats['avg_latency_ms']:.1f}ms")
-print(f"儲存能力: {stats['storage_capability']}")
-```
-
-### 效能基準
-
-| 指標 | v3.0 (EvoMem) | v4.0 (MemoryHub) | 說明 |
-|------|--------------|----------------|------|
-| **查詢延遲** | 45ms | 60ms (+33%) | 手動過濾開銷 |
-| **快取命中延遲** | - | 5ms | 新增快取層 |
-| **快取命中率** | - | 50%+ | 節省 50% 查詢 |
-| **降級處理** | ❌ 無 | ✅ 自動 | EvoMem 失敗時降級 JSON |
-
-**效能優化建議**:
-- 使用快取：相同查詢自動快取（最近 100 次）
-- 定期清理：`hub.clear_cache()` 在添加大量記憶後
-- 批次查詢：一次查詢多個結果，而非多次單一查詢
-
----
-
-## ⚠️ v4.0 已知限制
-
-### 1. metadata 過濾功能變更
-
-**問題**: Universal Storage v2.0.0 不支援原生 `where` 參數
-
-**v3.0 行為**:
-```python
-# 直接在向量搜尋層過濾
-results = memory.query("TDD", where={"expert": "xiaocheng"})
-# ChromaDB 直接返回過濾結果
-```
-
-**v4.0 行為**:
-```python
-# 手動過濾（查詢 2x 結果後過濾）
-results = hub.intelligent_query("TDD", agent_type="xiaocheng")
-# 內部: 查詢 10 個結果 → 手動過濾 → 返回 5 個
-```
-
-**影響**:
-- ✅ 功能保留（向後相容）
-- ⚠️ 效能損失 ~30%（2x 查詢開銷）
-- ✅ 快取層可彌補大部分損失
-
-**未來改進**（v2.1 計畫）:
-```python
-# Universal Storage v2.1 將支援原生 where
-results = storage.search("TDD", n_results=5, where={"expert": "xiaocheng"})
-```
-
-### 2. 降級模式功能限制
-
-**EvoMem 不可用時**:
-- ❌ **無語義搜尋**：`hub.intelligent_query()` 返回空列表
-- ✅ **可添加記憶**：`hub.add_memory()` 仍可用（存入 JSON）
-- ✅ **品質評分**：`hub.calculate_quality_score()` 仍可用
-- ❌ **推薦系統**：`hub.get_recommendations()` 返回空列表
-
-**緩解策略**:
-```python
-hub = MemoryHub()
-
-if hub.capability == StorageCapability.FULL:
-    # 完整功能
-    results = hub.intelligent_query("TDD", n_results=5)
-else:
-    print("⚠️ EvoMem 不可用，切換到離線快取模式")
-    # 使用預先導出的離線快取
-    results = load_offline_cache("TDD")
-```
-
----
-
 ## 🧪 測試策略（v4.0）
 
 ### 測試覆蓋率
@@ -563,17 +339,6 @@ pytest test_memory_hub.py --cov=memory_hub --cov-report=html
 
 ---
 
-**🎯 小憶 v4.0-universal 升級完成！**
-
-**核心價值**:
-- ✅ 保留 100% v3.0 功能（智能路由、主動推薦、跨專案搜尋）
-- ✅ 新增自動降級機制（EvoMem → JSON）
-- ✅ 新增快取層（50%+ 命中率）
-- ✅ 向後相容（舊代碼仍可用）
-- ✅ 後端可插拔（未來可輕鬆切換 Redis/PostgreSQL）
-
-**效能提升**:
-- 快取層: 50%+ 查詢節省
-- 降級保護: 100% 可用性保證
-
-**下一步**: 升級小程 v2.1 → v3.0-universal
+**Version**: 4.0-universal
+**Last Updated**: 2025-11-16
+**Maintainer**: EvoMem Team
