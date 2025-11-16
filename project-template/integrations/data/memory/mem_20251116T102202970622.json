@@ -1,0 +1,21 @@
+{
+  "id": "mem_20251116T102202970622",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:22:02.970622",
+  "session_memory": {
+    "content": "TDD 最佳實踐",
+    "metadata": {
+      "source": "validated",
+      "validated": true,
+      "expert": "xiaocheng",
+      "type": "learning",
+      "timestamp": "2025-11-16T10:22:02.970622"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "unknown",
+    "expert": "xiaocheng",
+    "tags": []
+  }
+}

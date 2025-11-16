@@ -94,6 +94,8 @@ class MemoryHub:
         3. 自動快取
         4. 效能統計
 
+        Complexity: C = 2 (協調方法)
+
         Args:
             query: 查詢字串
             agent_type: 專家類型（如 "xiaocheng", "xiaozhi"）
@@ -115,54 +117,21 @@ class MemoryHub:
         start_time = time.time()
         self._stats["total_queries"] += 1
 
-        # 檢查快取
-        cache_key = f"{query}:{agent_type}:{project}:{n_results}"
-        if cache_key in self._query_cache:
-            self._stats["cache_hits"] += 1
-            print(f"⚡ 快取命中: {cache_key[:50]}...")
-            return self._query_cache[cache_key]
+        # 檢查快取（C += 1）
+        cache_result = self._check_cache(query, agent_type, project, n_results)
+        if cache_result is not None:
+            return cache_result
 
-        # 檢查儲存能力
-        if self.capability != StorageCapability.FULL:
-            print("⚠️ EvoMem 不可用，語義搜尋降級")
-            return []
+        # 執行搜尋
+        raw_results = self._execute_search(query, n_results)
 
-        # 語義搜尋（查詢 2x 結果以便過濾）
-        try:
-            results = self.storage.search(query, n_results=n_results * 2)
-        except Exception as e:
-            print(f"❌ 查詢失敗: {e}")
-            return []
+        # 應用過濾
+        filtered = self._apply_filters(raw_results, agent_type, project, n_results)
 
-        # 手動過濾 metadata（替代舊 where 參數）
-        filtered_results = results
+        # 更新快取與統計
+        self._finalize_query(query, agent_type, project, n_results, filtered, start_time)
 
-        if agent_type:
-            self._stats["filtered_queries"] += 1
-            filtered_results = [
-                r for r in filtered_results
-                if r.get("metadata", {}).get("expert") == agent_type
-            ]
-
-        if project:
-            filtered_results = [
-                r for r in filtered_results
-                if r.get("metadata", {}).get("project") == project
-            ]
-
-        # 限制結果數量
-        filtered_results = filtered_results[:n_results]
-
-        # 更新快取
-        self._update_cache(cache_key, filtered_results)
-
-        # 記錄效能
-        elapsed_ms = (time.time() - start_time) * 1000
-        self._update_stats(elapsed_ms)
-
-        print(f"✅ 查詢完成: {len(filtered_results)} 條結果 ({elapsed_ms:.1f}ms)")
-
-        return filtered_results
+        return filtered
 
     def add_memory(
         self,
@@ -175,6 +144,8 @@ class MemoryHub:
     ) -> bool:
         """
         添加記憶（向後相容 IntelligentMemorySystem.add_memory）
+
+        Complexity: C = 1 (協調方法)
 
         Args:
             content: 記憶內容
@@ -195,53 +166,14 @@ class MemoryHub:
             ...     tags=["TDD", "pytest"]
             ... )
         """
-        # 構建 metadata
-        if metadata is None:
-            metadata = {}
+        # 構建完整 metadata
+        full_metadata = self._build_metadata(metadata, expert, memory_type, project, tags)
 
-        # 添加額外欄位
-        if expert:
-            metadata["expert"] = expert
-        if memory_type:
-            metadata["type"] = memory_type
-        if project:
-            metadata["project"] = project
-        if tags:
-            metadata["tags"] = tags
+        # 構建 memory_item
+        memory_item = self._build_memory_item(content, full_metadata)
 
-        # 自動添加時間戳
-        metadata["timestamp"] = datetime.now().isoformat()
-
-        # 添加到 Universal Storage
-        try:
-            # 構建符合 UniversalStorage 格式的記憶項目
-            memory_item = {
-                "id": f"mem_{metadata.get('timestamp', 'unknown').replace(':', '').replace('-', '').replace('.', '')}",
-                "type": metadata.get("type", "learning"),
-                "timestamp": metadata.get("timestamp"),
-                "session_memory": {
-                    "content": content,
-                    "metadata": metadata
-                },
-                "long_term_memory": {},
-                "metadata": {
-                    "project": metadata.get("project", "unknown"),
-                    "expert": metadata.get("expert", "unknown"),
-                    "tags": metadata.get("tags", [])
-                }
-            }
-
-            # 使用 store 方法（UniversalStorage 標準介面）
-            self.storage.store(memory_item)
-            print(f"✅ 記憶已添加: {content[:50]}...")
-
-            # 清除快取（新記憶可能影響查詢結果）
-            self._query_cache.clear()
-
-            return True
-        except Exception as e:
-            print(f"❌ 添加記憶失敗: {e}")
-            return False
+        # 儲存並清除快取（C += 1 for try-except）
+        return self._store_memory(memory_item, content)
 
     def query(
         self,
@@ -413,7 +345,262 @@ class MemoryHub:
         self._query_cache.clear()
         print("✅ 快取已清除")
 
-    # ========== 私有方法 ==========
+    # ========== 私有方法：添加記憶相關 ==========
+
+    def _build_metadata(
+        self,
+        metadata: Optional[Dict[str, Any]],
+        expert: Optional[str],
+        memory_type: Optional[str],
+        project: Optional[str],
+        tags: Optional[List[str]]
+    ) -> Dict[str, Any]:
+        """
+        構建完整 metadata
+
+        Complexity: C = 5 (5 個 if)
+
+        Args:
+            metadata: 基礎 metadata
+            expert: 專家名稱
+            memory_type: 記憶類型
+            project: 專案名稱
+            tags: 標籤列表
+
+        Returns:
+            完整的 metadata 字典
+        """
+        if metadata is None:
+            metadata = {}
+
+        # 添加額外欄位
+        if expert:
+            metadata["expert"] = expert
+        if memory_type:
+            metadata["type"] = memory_type
+        if project:
+            metadata["project"] = project
+        if tags:
+            metadata["tags"] = tags
+
+        # 自動添加時間戳
+        metadata["timestamp"] = datetime.now().isoformat()
+
+        return metadata
+
+    def _build_memory_item(self, content: str, metadata: Dict[str, Any]) -> Dict:
+        """
+        構建符合 UniversalStorage 格式的記憶項目
+
+        Complexity: C = 1
+
+        Args:
+            content: 記憶內容
+            metadata: 完整 metadata
+
+        Returns:
+            符合格式的 memory_item
+        """
+        return {
+            "id": f"mem_{metadata.get('timestamp', 'unknown').replace(':', '').replace('-', '').replace('.', '')}",
+            "type": metadata.get("type", "learning"),
+            "timestamp": metadata.get("timestamp"),
+            "session_memory": {
+                "content": content,
+                "metadata": metadata
+            },
+            "long_term_memory": {},
+            "metadata": {
+                "project": metadata.get("project", "unknown"),
+                "expert": metadata.get("expert", "unknown"),
+                "tags": metadata.get("tags", [])
+            }
+        }
+
+    def _store_memory(self, memory_item: Dict, content: str) -> bool:
+        """
+        儲存記憶並清除快取
+
+        Complexity: C = 1 (try-except)
+
+        Args:
+            memory_item: 記憶項目
+            content: 記憶內容（用於日誌）
+
+        Returns:
+            是否成功
+        """
+        try:
+            self.storage.store(memory_item)
+            print(f"✅ 記憶已添加: {content[:50]}...")
+
+            # 清除快取（新記憶可能影響查詢結果）
+            self._query_cache.clear()
+
+            return True
+        except Exception as e:
+            print(f"❌ 添加記憶失敗: {e}")
+            return False
+
+    # ========== 私有方法：查詢相關 ==========
+
+    def _check_cache(
+        self,
+        query: str,
+        agent_type: Optional[str],
+        project: Optional[str],
+        n_results: int
+    ) -> Optional[List[Dict]]:
+        """
+        檢查快取（單一職責）
+
+        Complexity: C = 1
+
+        Args:
+            query: 查詢字串
+            agent_type: 專家類型
+            project: 專案名稱
+            n_results: 結果數量
+
+        Returns:
+            快取結果（如果命中）或 None
+        """
+        cache_key = f"{query}:{agent_type}:{project}:{n_results}"
+        if cache_key in self._query_cache:
+            self._stats["cache_hits"] += 1
+            print(f"⚡ 快取命中: {cache_key[:50]}...")
+            return self._query_cache[cache_key]
+        return None
+
+    def _execute_search(self, query: str, n_results: int) -> List[Dict]:
+        """
+        執行語義搜尋（單一職責）
+
+        Complexity: C = 2 (try-except + if)
+
+        Args:
+            query: 查詢字串
+            n_results: 結果數量
+
+        Returns:
+            搜尋結果列表
+        """
+        # 檢查儲存能力（C += 1）
+        if self.capability != StorageCapability.FULL:
+            print("⚠️ EvoMem 不可用，語義搜尋降級")
+            return []
+
+        # 語義搜尋（查詢 2x 結果以便過濾）（C += 1 for try-except）
+        try:
+            results = self.storage.search(query, n_results=n_results * 2)
+            return results
+        except Exception as e:
+            print(f"❌ 查詢失敗: {e}")
+            return []
+
+    def _apply_filters(
+        self,
+        results: List[Dict],
+        agent_type: Optional[str],
+        project: Optional[str],
+        n_results: int
+    ) -> List[Dict]:
+        """
+        應用過濾條件（單一職責）
+
+        Complexity: C = 2 (兩個 if)
+
+        Args:
+            results: 原始結果
+            agent_type: 專家類型過濾
+            project: 專案過濾
+            n_results: 最終結果數量
+
+        Returns:
+            過濾後的結果
+        """
+        filtered = results
+
+        # 按專家過濾（C += 1）
+        if agent_type:
+            self._stats["filtered_queries"] += 1
+            filtered = self._filter_by_agent(filtered, agent_type)
+
+        # 按專案過濾（C += 1）
+        if project:
+            filtered = self._filter_by_project(filtered, project)
+
+        return filtered[:n_results]
+
+    def _filter_by_agent(self, results: List[Dict], agent_type: str) -> List[Dict]:
+        """
+        按專家過濾（最小職責）
+
+        Complexity: C = 1
+
+        Args:
+            results: 結果列表
+            agent_type: 專家類型
+
+        Returns:
+            過濾後的結果
+        """
+        return [
+            r for r in results
+            if r.get("metadata", {}).get("expert") == agent_type
+        ]
+
+    def _filter_by_project(self, results: List[Dict], project: str) -> List[Dict]:
+        """
+        按專案過濾（最小職責）
+
+        Complexity: C = 1
+
+        Args:
+            results: 結果列表
+            project: 專案名稱
+
+        Returns:
+            過濾後的結果
+        """
+        return [
+            r for r in results
+            if r.get("metadata", {}).get("project") == project
+        ]
+
+    def _finalize_query(
+        self,
+        query: str,
+        agent_type: Optional[str],
+        project: Optional[str],
+        n_results: int,
+        filtered: List[Dict],
+        start_time: float
+    ):
+        """
+        完成查詢（更新快取與統計）
+
+        Complexity: C = 1
+
+        Args:
+            query: 查詢字串
+            agent_type: 專家類型
+            project: 專案名稱
+            n_results: 結果數量
+            filtered: 過濾後的結果
+            start_time: 查詢開始時間
+        """
+        # 更新快取
+        cache_key = f"{query}:{agent_type}:{project}:{n_results}"
+        self._update_cache(cache_key, filtered)
+
+        # 記錄效能
+        elapsed_ms = (time.time() - start_time) * 1000
+        self._update_stats(elapsed_ms)
+
+        print(f"✅ 查詢完成: {len(filtered)} 條結果 ({elapsed_ms:.1f}ms)")
+
+    # ========== 私有方法：快取與統計 ==========
 
     def _update_cache(self, key: str, value: List[Dict]):
         """更新快取（LRU 策略）"""
@@ -433,6 +620,8 @@ class MemoryHub:
         self._stats["avg_latency_ms"] = (
             (current_avg * (n - 1) + latency_ms) / n
         )
+
+    # ========== 私有方法：洞察生成 ==========
 
     def _generate_insight(self, memory: Dict[str, Any]) -> str:
         """

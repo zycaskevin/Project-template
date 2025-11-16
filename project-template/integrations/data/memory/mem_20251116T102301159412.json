@@ -1,0 +1,18 @@
+{
+  "id": "mem_20251116T102301159412",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:23:01.159412",
+  "session_memory": {
+    "content": "效能測試",
+    "metadata": {
+      "expert": "xiaocheng",
+      "timestamp": "2025-11-16T10:23:01.159412"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "unknown",
+    "expert": "xiaocheng",
+    "tags": []
+  }
+}

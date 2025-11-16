@@ -1,0 +1,19 @@
+{
+  "id": "mem_20251116T102301118902",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:23:01.118902",
+  "session_memory": {
+    "content": "小程的 TDD 實踐",
+    "metadata": {
+      "expert": "xiaocheng",
+      "type": "learning",
+      "timestamp": "2025-11-16T10:23:01.118902"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "unknown",
+    "expert": "xiaocheng",
+    "tags": []
+  }
+}

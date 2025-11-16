@@ -1,0 +1,20 @@
+{
+  "id": "mem_20251116T102301147456",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:23:01.147456",
+  "session_memory": {
+    "content": "高品質記憶",
+    "metadata": {
+      "source": "validated",
+      "validated": true,
+      "frequency": 10,
+      "timestamp": "2025-11-16T10:23:01.147456"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "unknown",
+    "expert": "unknown",
+    "tags": []
+  }
+}

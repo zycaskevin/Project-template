@@ -1,0 +1,24 @@
+{
+  "id": "mem_20251116T102301157418",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:23:01.157418",
+  "session_memory": {
+    "content": "TDD Red-Green-Refactor",
+    "metadata": {
+      "expert": "xiaocheng",
+      "type": "learning",
+      "tags": [
+        "TDD"
+      ],
+      "timestamp": "2025-11-16T10:23:01.157418"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "unknown",
+    "expert": "xiaocheng",
+    "tags": [
+      "TDD"
+    ]
+  }
+}
