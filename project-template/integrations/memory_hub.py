@@ -114,6 +114,9 @@ class MemoryHub:
             ... )
             >>> print(f"找到 {len(results)} 條記憶")
         """
+        # 輸入驗證（P1 改善）
+        self._validate_query_params(query, n_results)
+
         start_time = time.time()
         self._stats["total_queries"] += 1
 
@@ -474,9 +477,9 @@ class MemoryHub:
 
     def _execute_search(self, query: str, n_results: int) -> List[Dict]:
         """
-        執行語義搜尋（單一職責）
+        執行語義搜尋或降級模式的基礎搜尋（P1 增強）
 
-        Complexity: C = 2 (try-except + if)
+        Complexity: C = 2.5 (try-except + if + degraded mode)
 
         Args:
             query: 查詢字串
@@ -487,8 +490,8 @@ class MemoryHub:
         """
         # 檢查儲存能力（C += 1）
         if self.capability != StorageCapability.FULL:
-            print("⚠️ EvoMem 不可用，語義搜尋降級")
-            return []
+            print("⚠️ EvoMem 不可用，使用降級模式（基礎關鍵字匹配）")
+            return self._degraded_mode_search(query, n_results)
 
         # 語義搜尋（查詢 2x 結果以便過濾）（C += 1 for try-except）
         try:
@@ -641,6 +644,91 @@ class MemoryHub:
         }
 
         return insights.get(memory_type, f"💡 相關記憶來自 {expert}")
+
+    def _validate_query_params(self, query: str, n_results: int) -> None:
+        """
+        驗證查詢參數（P1 改善）
+
+        Complexity: C = 1.5
+
+        Args:
+            query: 查詢字串
+            n_results: 返回結果數量
+
+        Raises:
+            ValueError: 如果參數無效
+        """
+        # 檢查查詢字串
+        if not query or not query.strip():
+            raise ValueError("查詢字串不能為空")
+
+        if len(query) > 1000:
+            raise ValueError(f"查詢字串過長（{len(query)} 字元），最多 1000 字元")
+
+        # 檢查 n_results
+        if n_results <= 0:
+            raise ValueError(f"n_results 必須為正數，目前值: {n_results}")
+
+        if n_results > 100:
+            raise ValueError(f"n_results 不能超過 100，目前值: {n_results}")
+
+    def _degraded_mode_search(self, query: str, n_results: int) -> List[Dict]:
+        """
+        降級模式搜尋：使用基礎關鍵字匹配（P1 增強）
+
+        當 EvoMem 不可用時，透過關鍵字匹配提供基本搜尋能力。
+
+        Complexity: C = 2.5
+
+        Args:
+            query: 查詢字串
+            n_results: 返回結果數量
+
+        Returns:
+            匹配的記憶列表
+        """
+        # 從 JSON 儲存中獲取所有記憶
+        try:
+            all_memories = self.storage.list()
+        except Exception as e:
+            print(f"❌ 讀取記憶失敗: {e}")
+            return []
+
+        # 提取查詢關鍵字（轉為小寫）
+        keywords = query.lower().split()
+
+        # 為每個記憶計算關鍵字匹配分數
+        scored_memories = []
+        for memory in all_memories:
+            content = memory.get("content", "").lower()
+            metadata = memory.get("metadata", {})
+            tags = metadata.get("tags", [])
+
+            # 計算匹配分數
+            score = 0
+
+            # Content 匹配（每個匹配的關鍵字 +1）
+            for keyword in keywords:
+                if keyword in content:
+                    score += 1
+
+            # Tags 匹配（精確匹配 +2）
+            for tag in tags:
+                if tag.lower() in keywords:
+                    score += 2
+
+            # 只保留有匹配的記憶
+            if score > 0:
+                scored_memories.append((score, memory))
+
+        # 按分數排序（降序）
+        scored_memories.sort(key=lambda x: x[0], reverse=True)
+
+        # 返回前 n_results 條
+        results = [memory for score, memory in scored_memories[:n_results]]
+
+        print(f"📊 降級模式找到 {len(results)}/{len(all_memories)} 條匹配記憶")
+        return results
 
 
 # ========== 向後相容別名 ==========
