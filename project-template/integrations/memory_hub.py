@@ -214,10 +214,25 @@ class MemoryHub:
 
         # 添加到 Universal Storage
         try:
-            self.storage.add({
-                "content": content,
-                "metadata": metadata
-            })
+            # 構建符合 UniversalStorage 格式的記憶項目
+            memory_item = {
+                "id": f"mem_{metadata.get('timestamp', 'unknown').replace(':', '').replace('-', '').replace('.', '')}",
+                "type": metadata.get("type", "learning"),
+                "timestamp": metadata.get("timestamp"),
+                "session_memory": {
+                    "content": content,
+                    "metadata": metadata
+                },
+                "long_term_memory": {},
+                "metadata": {
+                    "project": metadata.get("project", "unknown"),
+                    "expert": metadata.get("expert", "unknown"),
+                    "tags": metadata.get("tags", [])
+                }
+            }
+
+            # 使用 store 方法（UniversalStorage 標準介面）
+            self.storage.store(memory_item)
             print(f"✅ 記憶已添加: {content[:50]}...")
 
             # 清除快取（新記憶可能影響查詢結果）

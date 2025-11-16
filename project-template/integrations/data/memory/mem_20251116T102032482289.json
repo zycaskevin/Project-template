@@ -1,0 +1,19 @@
+{
+  "id": "mem_20251116T102032482289",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:20:32.482289",
+  "session_memory": {
+    "content": "小質的測試策略",
+    "metadata": {
+      "expert": "xiaozhi",
+      "type": "learning",
+      "timestamp": "2025-11-16T10:20:32.482289"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "unknown",
+    "expert": "xiaozhi",
+    "tags": []
+  }
+}

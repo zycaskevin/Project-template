@@ -1,0 +1,16 @@
+{
+  "type": "handoff",
+  "session_memory": {
+    "sessionIntent": [
+      "Test intent"
+    ],
+    "playByPlay": [
+      "Test action"
+    ]
+  },
+  "metadata": {
+    "project": "Test Project",
+    "phase": "Test Phase"
+  },
+  "id": "mem_20251115_170027"
+}

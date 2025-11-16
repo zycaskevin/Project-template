@@ -1,0 +1,20 @@
+{
+  "id": "mem_20251116T102032506179",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:20:32.506179",
+  "session_memory": {
+    "content": "使用 fixture 提高複用",
+    "metadata": {
+      "source": "validated",
+      "expert": "xiaocheng",
+      "type": "learning",
+      "timestamp": "2025-11-16T10:20:32.506179"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "unknown",
+    "expert": "xiaocheng",
+    "tags": []
+  }
+}

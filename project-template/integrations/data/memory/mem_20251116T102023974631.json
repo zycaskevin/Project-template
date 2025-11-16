@@ -1,0 +1,28 @@
+{
+  "id": "mem_20251116T102023974631",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:20:23.974631",
+  "session_memory": {
+    "content": "完整 metadata 測試",
+    "metadata": {
+      "expert": "xiaocheng",
+      "type": "learning",
+      "project": "EvoMem",
+      "tags": [
+        "TDD",
+        "pytest"
+      ],
+      "source": "validated",
+      "timestamp": "2025-11-16T10:20:23.974631"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "EvoMem",
+    "expert": "xiaocheng",
+    "tags": [
+      "TDD",
+      "pytest"
+    ]
+  }
+}

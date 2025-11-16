@@ -1,0 +1,19 @@
+{
+  "id": "mem_20251116T102032484103",
+  "type": "learning",
+  "timestamp": "2025-11-16T10:20:32.484103",
+  "session_memory": {
+    "content": "EvoMem 記憶系統",
+    "metadata": {
+      "type": "learning",
+      "project": "EvoMem",
+      "timestamp": "2025-11-16T10:20:32.484103"
+    }
+  },
+  "long_term_memory": {},
+  "metadata": {
+    "project": "EvoMem",
+    "expert": "unknown",
+    "tags": []
+  }
+}
