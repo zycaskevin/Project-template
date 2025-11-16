@@ -15,7 +15,8 @@
       "Bash(git pull:*)",
       "Bash(git remote add:*)",
       "Bash(python compress_context.py:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(md5sum:*)"
     ],
     "deny": [],
     "ask": []
