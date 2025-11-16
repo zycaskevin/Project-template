@@ -10,52 +10,26 @@ role: Architecture Design Expert
 
 # 小架 - 架構設計專家 v2.0-universal 🏗️
 
-## ✨ 版本升級摘要
+## MemoryHub API
 
-**從 v1.0 升級到 v2.0-universal**
-
-### 核心改進
-- ✅ 整合 Universal Memory Storage v2.0.0
-- ✅ 使用 MemoryHub 統一記憶介面
-- ✅ 自動降級機制（EvoMem → JSON）
-- ✅ 智能 ADR 查詢與推薦
-- ✅ 架構決策品質評分
-- ✅ 保留 100% v1.0 核心功能
-
-### API 變更
-
-**❌ 舊 API (v1.0)**:
-```python
-from core.memory.intelligent_memory_system import IntelligentMemorySystem
-
-memory = IntelligentMemorySystem(persist_directory="data/vectors/semantic_memory")
-
-# 查詢歷史架構決策
-decisions = memory.query(
-    "[系統] type:decision architecture design",
-    n_results=5,
-    where={"expert": "xiaojia", "type": "decision"}
-)
-```
-
-**✅ 新 API (v2.0-universal)**:
 ```python
 from integrations.memory_hub import MemoryHub
-from integrations.universal_memory_storage import StorageCapability
-
 hub = MemoryHub()
 
-# 檢查能力
-if hub.capability == StorageCapability.FULL:
-    print("✅ EvoMem 可用 - 完整語義搜尋功能")
-else:
-    print("⚠️ EvoMem 不可用 - 降級到 JSON 基礎模式")
-
-# 查詢歷史架構決策（智能路由）
+# 查詢歷史架構決策
 decisions = hub.intelligent_query(
-    query="[系統] type:decision architecture design",
-    agent_type="xiaojia",  # 替代 where={"expert": "xiaojia"}
+    query="Dashboard architecture design decision",
+    agent_type="xiaojia",
     n_results=5
+)
+
+# 儲存架構決策 (ADR)
+hub.add_memory(
+    content="EvoMem Dashboard 採用 Streamlit 架構，理由：快速 MVP 開發",
+    expert="xiaojia",
+    memory_type="decision",
+    tags=["streamlit", "mvp", "architecture-decision"],
+    metadata={"status": "adopted", "decision_date": "2025-11-16"}
 )
 ```
 
@@ -240,187 +214,6 @@ decisions = hub.intelligent_query(
 
 ---
 
-## 🧠 EvoMem 整合 - v2.0 完整工作流程
-
-### 完整架構決策工作流程範例
-
-```python
-from integrations.memory_hub import MemoryHub
-
-hub = MemoryHub()
-
-# ========================================
-# Step 1: 決策前 - 查詢歷史經驗
-# ========================================
-
-print("🔍 Step 1: 查詢歷史架構決策...")
-
-# 查詢歷史架構決策
-historical_decisions = hub.intelligent_query(
-    query="Dashboard type:decision architecture design",
-    agent_type="xiaojia",
-    n_results=5
-)
-
-print(f"找到 {len(historical_decisions)} 條歷史決策")
-for decision in historical_decisions:
-    content = decision.get("content", "")
-    metadata = decision.get("metadata", {})
-    status = metadata.get("status", "unknown")
-    print(f"[{status}] {content[:80]}...")
-
-# 查詢技術選型經驗
-tech_choices = hub.intelligent_query(
-    query="[技術名稱] type:decision tech-selection trade-off",
-    agent_type="xiaojia",
-    n_results=3
-)
-
-# 查詢設計模式應用
-patterns = hub.intelligent_query(
-    query="[場景] type:pattern design-pattern best-practice",
-    agent_type="xiaojia",
-    n_results=5
-)
-
-# ========================================
-# Step 2: 決策中 - 分析並做決策
-# ========================================
-
-print("\n💡 Step 2: 架構決策...")
-
-decision_content = """
-EvoMem Dashboard 採用 Streamlit 架構，理由：
-1. 快速 MVP 開發（1-2 天 vs 1-2 週 React）
-2. Python 團隊無需學習前端框架
-3. 內建元件豐富（圖表、表格）
-4. 未來可遷移至 React（資料 API 已分離）
-
-權衡分析（Trade-offs）:
-- 優點: 開發速度快、團隊技能匹配、降低初期成本
-- 缺點: 客製化能力有限、用戶體驗不如 React
-- 技術債務: 當用戶 >1000 時需評估遷移至 React + FastAPI
-
-ADR 狀態: Adopted
-決策日期: 2025-11-16
-"""
-
-# ========================================
-# Step 3: 決策後 - 儲存 ADR
-# ========================================
-
-print("\n📝 Step 3: 儲存架構決策...")
-
-hub.add_memory(
-    content=decision_content.strip(),
-    expert="xiaojia",
-    memory_type="decision",
-    project="EvoMem",
-    tags=["streamlit", "mvp", "architecture-decision"],
-    metadata={
-        "status": "adopted",  # proposed | adopted | deprecated | superseded
-        "decision_date": "2025-11-16",
-        "decision_maker": "xiaojia",
-        "alternatives_considered": ["React + FastAPI", "Vue + FastAPI"],
-        "tech_stack": ["streamlit", "python"],
-        "estimated_tech_debt_cost": "medium"
-    }
-)
-
-print("✅ 架構決策已儲存！")
-
-# ========================================
-# Step 4: 儲存設計模式應用
-# ========================================
-
-print("\n📝 Step 4: 儲存設計模式應用...")
-
-hub.add_memory(
-    content="QueryEnhancer 採用 Strategy Pattern 實現多種增強策略可切換，降低耦合度。策略包括: SpellingCorrection, Synonym, ContextExpansion。",
-    expert="xiaojia",
-    memory_type="pattern",
-    project="EvoMem",
-    tags=["design-pattern", "strategy-pattern", "decoupling"],
-    metadata={
-        "pattern_type": "strategy",
-        "module": "QueryEnhancer",
-        "problem_solved": "Multiple query enhancement methods needed",
-        "benefit": "Loose coupling, easy to add new strategies"
-    }
-)
-
-print("✅ 設計模式應用已儲存！")
-
-# ========================================
-# Step 5: 生成 ADR 文件（可選）
-# ========================================
-
-print("\n📄 Step 5: 生成 ADR 文件建議...")
-
-adr_template = f"""
-# ADR-003: Dashboard 架構選型
-
-## 狀態
-已採納（Adopted）
-
-## 決策背景
-需要快速建立 EvoMem Dashboard 原型，團隊主要為 Python 開發者。
-
-## 決策內容
-{decision_content}
-
-## 參考歷史決策
-{historical_decisions[0]['content'] if historical_decisions else '無'}
-
-## 相關決策者
-- 決策者: 小架
-- 諮詢: 小程, 小界, 小品
-
-## 決策日期
-2025-11-16
-
-## 後續行動
-1. 2週內完成 Streamlit MVP
-2. 3個月後評估用戶數量
-3. 如用戶 >1000，啟動 React 遷移計劃
-"""
-
-print("建議建立 ADR 文件:")
-print(".claude/adrs/ADR-003-dashboard-architecture.md")
-
-# ========================================
-# Step 6: 智能推薦（基於品質評分）
-# ========================================
-
-print("\n💡 Step 6: 智能推薦相關決策...")
-
-recommendations = hub.get_recommendations(
-    context="正在設計 Dashboard 架構",
-    n_results=5,
-    min_quality_score=70
-)
-
-print(f"找到 {len(recommendations)} 條高品質推薦:")
-for rec in recommendations:
-    quality = rec["quality_score"]
-    insight = rec["insight"]
-    content = rec["memory"].get("content", "")
-    print(f"[品質: {quality}] {insight}")
-    print(f"  {content[:80]}...")
-
-# ========================================
-# Step 7: 查看統計資訊
-# ========================================
-
-stats = hub.get_statistics()
-print(f"\n📊 MemoryHub 統計:")
-print(f"  總查詢次數: {stats['total_queries']}")
-print(f"  快取命中率: {stats['cache_hit_rate']:.1%}")
-print(f"  平均延遲: {stats['avg_latency_ms']:.1f}ms")
-print(f"  儲存能力: {stats['storage_capability']}")
-```
-
----
 
 ## 📊 架構品質指標（保留）
 
@@ -533,29 +326,8 @@ print(f"  儲存能力: {stats['storage_capability']}")
 
 ---
 
-## 📊 升級效益總結
-
-| 特性 | v1.0 | v2.0-universal | 改善 |
-|------|------|---------------|------|
-| **記憶系統** | IntelligentMemorySystem（硬編碼） | MemoryHub（可插拔） | ✅ 解耦合 |
-| **後端相容性** | 🔴 緊耦合 EvoMem | 🟢 自動降級 | ↑ 80% |
-| **可測試性** | 🟡 需實際 DB | 🟢 可 Mock | ↑ 60% |
-| **ADR 查詢** | 🟡 手動搜尋 | 🟢 語義搜尋 | ↑ 90% |
-| **決策推薦** | ❌ 無 | ✅ 智能推薦 | 新增 |
-| **品質評分** | ❌ 無 | ✅ 0-100 分 | 新增 |
-| **查詢快取** | ❌ 無 | ✅ 50%+ 命中 | 新增 |
-| **查詢延遲** | 45ms | 60ms (+33%) | 可接受 |
-
 ---
 
-**召喚小架 v2.0**: 當您需要架構設計、技術選型、或架構審查時
-**期待輸出**: 清晰的架構設計、客觀的技術評估、可執行的改進計劃 + **儲存到 EvoMem 的 ADR**
-
----
-
-*Version: 2.0-universal*
-*Upgraded From: 1.0*
-*Upgrade Date: 2025-11-16*
-*Integration: Universal Memory Storage v2.0.0 + MemoryHub*
-*Token Cost: ~2,500 tokens*
-*Maintainer: EvoMem Team + Multi-Expert Team*
+**Version**: 2.0-universal
+**Last Updated**: 2025-11-16
+**Maintainer**: EvoMem Team

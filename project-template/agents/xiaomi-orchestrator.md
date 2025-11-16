@@ -10,52 +10,26 @@ role: Multi-Agent Orchestrator
 
 # 小米 - 全域協調專家 v2.0-universal 🎯
 
-## ✨ 版本升級摘要
+## MemoryHub API
 
-**從 v1.0 升級到 v2.0-universal**
-
-### 核心改進
-- ✅ 整合 Universal Memory Storage v2.0.0
-- ✅ 使用 MemoryHub 統一記憶介面
-- ✅ 自動降級機制（EvoMem → JSON）
-- ✅ 智能協調模式查詢
-- ✅ 工作流程經驗複用
-- ✅ 保留 100% v1.0 核心功能
-
-### API 變更
-
-**❌ 舊 API (v1.0)**:
-```python
-from core.memory.intelligent_memory_system import IntelligentMemorySystem
-
-memory = IntelligentMemorySystem(persist_directory="data/vectors/semantic_memory")
-
-# 查詢歷史協調模式
-coordination = memory.query(
-    "[任務類型] type:coordination workflow",
-    n_results=5,
-    where={"expert": "xiaomi", "type": "coordination"}
-)
-```
-
-**✅ 新 API (v2.0-universal)**:
 ```python
 from integrations.memory_hub import MemoryHub
-from integrations.universal_memory_storage import StorageCapability
-
 hub = MemoryHub()
 
-# 檢查能力
-if hub.capability == StorageCapability.FULL:
-    print("✅ EvoMem 可用 - 完整語義搜尋功能")
-else:
-    print("⚠️ EvoMem 不可用 - 降級到 JSON 基礎模式")
-
-# 查詢歷史協調模式（智能路由）
+# 查詢歷史協調模式
 coordination = hub.intelligent_query(
-    query="[任務類型] type:coordination workflow",
-    agent_type="xiaomi",  # 替代 where={"expert": "xiaomi"}
+    query="[TDD] 小質 小程 協作模式 成功案例",
+    agent_type="xiaomi",
     n_results=5
+)
+
+# 儲存協調經驗
+hub.add_memory(
+    content="TDD 開發任務協調: 小質 SBE → 小程 Red-Green-Refactor，成功率 100%",
+    expert="xiaomi",
+    memory_type="coordination",
+    tags=["TDD", "workflow", "xiaozhi", "xiaocheng"],
+    metadata={"success_rate": 1.0, "avg_duration_hours": 1.9}
 )
 ```
 
@@ -379,146 +353,6 @@ for task_type, duration in benchmarks.items():
 
 ---
 
-## 🧠 EvoMem 整合 - v2.0 完整工作流程
-
-### 完整協調工作流程範例
-
-```python
-from integrations.memory_hub import MemoryHub
-
-hub = MemoryHub()
-
-# ========================================
-# Step 1: 協調前 - 查詢歷史經驗
-# ========================================
-
-print("🔍 Step 1: 查詢歷史協調經驗...")
-
-# 查詢歷史 TDD 協調模式
-tdd_coordination = hub.intelligent_query(
-    query="[TDD] 小質 小程 協作模式 成功案例",
-    agent_type="xiaomi",
-    n_results=5
-)
-
-print(f"找到 {len(tdd_coordination)} 條歷史協調模式")
-for coord in tdd_coordination:
-    content = coord.get("content", "")
-    metadata = coord.get("metadata", {})
-    success_rate = metadata.get("success_rate", 0)
-    avg_duration = metadata.get("avg_duration_hours", 0)
-    print(f"[成功率: {success_rate:.1%}, 時間: {avg_duration:.1f}h] {content[:80]}...")
-
-# 查詢常見協調問題
-coordination_issues = hub.intelligent_query(
-    query="[多 Agent] 協調 衝突 問題 解決",
-    agent_type="xiaomi",
-    n_results=3
-)
-
-# ========================================
-# Step 2: 協調中 - 執行工作流程
-# ========================================
-
-print("\n🎼 Step 2: 執行 TDD 開發工作流程...")
-
-workflow_result = {
-    "workflow": "TDD-Development",
-    "phases": [
-        {"phase": "SBE", "agent": "xiaozhi", "status": "completed", "duration_min": 15},
-        {"phase": "Red", "agent": "xiaozhi + xiaoji", "status": "completed", "duration_min": 30},
-        {"phase": "Green", "agent": "xiaocheng + xiaoji", "status": "completed", "duration_min": 45},
-        {"phase": "Refactor", "agent": "xiaocheng", "status": "completed", "duration_min": 20},
-        {"phase": "Delivery", "agent": "xiaocheng", "status": "completed", "duration_min": 5}
-    ],
-    "total_duration_min": 115,
-    "success": True
-}
-
-# ========================================
-# Step 3: 協調後 - 儲存經驗
-# ========================================
-
-print("\n📝 Step 3: 儲存協調經驗到 EvoMem...")
-
-# 計算成功率與平均時間
-total_duration_hours = workflow_result["total_duration_min"] / 60
-success_rate = 1.0 if workflow_result["success"] else 0.0
-
-# 儲存協調經驗
-hub.add_memory(
-    content=f"TDD 開發任務協調: 小質 SBE → 小程 Red-Green-Refactor，成功率 100%，平均時間 {total_duration_hours:.1f}小時",
-    expert="xiaomi",
-    memory_type="coordination",
-    project="CurrentProject",
-    tags=["TDD", "workflow", "xiaozhi", "xiaocheng"],
-    metadata={
-        "workflow_type": "TDD-Development",
-        "agents_involved": ["xiaozhi", "xiaocheng", "xiaoji"],
-        "success_rate": success_rate,
-        "avg_duration_hours": total_duration_hours,
-        "total_phases": len(workflow_result["phases"]),
-        "complexity": "moderate"
-    }
-)
-
-print("✅ 協調經驗已儲存！")
-
-# ========================================
-# Step 4: 儲存 Agent 協作模式
-# ========================================
-
-print("\n📝 Step 4: 儲存 Agent 協作模式...")
-
-hub.add_memory(
-    content="小憶 + 小程 協作模式: 小憶查詢歷史實作模式 → 小程參考實作。效率提升 40%，避免重複造輪子。",
-    expert="xiaomi",
-    memory_type="collaboration",
-    project="CurrentProject",
-    tags=["xiaoji", "xiaocheng", "collaboration-pattern"],
-    metadata={
-        "collaboration_type": "sequential",
-        "agents_involved": ["xiaoji", "xiaocheng"],
-        "efficiency_improvement": 0.40,
-        "pattern": "query-then-implement"
-    }
-)
-
-print("✅ 協作模式已儲存！")
-
-# ========================================
-# Step 5: 智能推薦（基於品質評分）
-# ========================================
-
-print("\n💡 Step 5: 智能推薦協調模式...")
-
-recommendations = hub.get_recommendations(
-    context="正在協調 TDD 開發任務",
-    n_results=5,
-    min_quality_score=70
-)
-
-print(f"找到 {len(recommendations)} 條高品質推薦:")
-for rec in recommendations:
-    quality = rec["quality_score"]
-    insight = rec["insight"]
-    content = rec["memory"].get("content", "")
-    print(f"[品質: {quality}] {insight}")
-    print(f"  {content[:80]}...")
-
-# ========================================
-# Step 6: 查看統計資訊
-# ========================================
-
-stats = hub.get_statistics()
-print(f"\n📊 MemoryHub 統計:")
-print(f"  總查詢次數: {stats['total_queries']}")
-print(f"  快取命中率: {stats['cache_hit_rate']:.1%}")
-print(f"  平均延遲: {stats['avg_latency_ms']:.1f}ms")
-print(f"  儲存能力: {stats['storage_capability']}")
-```
-
----
 
 ## 🎯 4-Layer Permission Architecture（保留）
 
@@ -564,31 +398,8 @@ print(f"  儲存能力: {stats['storage_capability']}")
 
 ---
 
-## 📊 升級效益總結
-
-| 特性 | v1.0 | v2.0-universal | 改善 |
-|------|------|---------------|------|
-| **記憶系統** | IntelligentMemorySystem（硬編碼） | MemoryHub（可插拔） | ✅ 解耦合 |
-| **後端相容性** | 🔴 緊耦合 EvoMem | 🟢 自動降級 | ↑ 80% |
-| **可測試性** | 🟡 需實際 DB | 🟢 可 Mock | ↑ 60% |
-| **協調模式查詢** | 🟡 手動搜尋 | 🟢 語義搜尋 | ↑ 90% |
-| **工作流程複用** | ❌ 無 | ✅ 歷史經驗 | 新增 |
-| **效能基準** | ❌ 無 | ✅ 歷史數據 | 新增 |
-| **智能推薦** | ❌ 無 | ✅ 品質評分 | 新增 |
-| **查詢快取** | ❌ 無 | ✅ 50%+ 命中 | 新增 |
-| **查詢延遲** | 45ms | 60ms (+33%) | 可接受 |
-
 ---
 
-**召喚小米 v2.0**: 當您需要協調多個 Agent、編排複雜工作流程時
-**期待輸出**: 清晰的任務分解、智能 Agent 路由、高效工作流程編排 + **儲存到 EvoMem 的協調經驗**
-
----
-
-*Version: 2.0-universal*
-*Upgraded From: 1.0*
-*Upgrade Date: 2025-11-16*
-*Integration: Universal Memory Storage v2.0.0 + MemoryHub*
-*Token Cost: ~2,600 tokens*
-*Maintainer: EvoMem Team + Multi-Expert Team*
-*Design Pattern: Multi-Agent Coordination (2025 Best Practice)*
+**Version**: 2.0-universal
+**Last Updated**: 2025-11-16
+**Maintainer**: EvoMem Team

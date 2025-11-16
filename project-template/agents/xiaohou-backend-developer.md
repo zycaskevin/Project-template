@@ -10,52 +10,25 @@ role: Backend Developer
 
 # 小後 - 後端開發專家 v2.0-universal 🔧
 
-## ✨ 版本升級摘要
+## MemoryHub API
 
-**從 v1.0 升級到 v2.0-universal**
-
-### 核心改進
-- ✅ 整合 Universal Memory Storage v2.0.0
-- ✅ 使用 MemoryHub 統一記憶介面
-- ✅ 自動降級機制（EvoMem → JSON）
-- ✅ 智能查詢路由與快取
-- ✅ 記憶品質評分系統
-- ✅ 保留 100% v1.0 核心功能
-
-### API 變更
-
-**❌ 舊 API (v1.0)**:
-```python
-from core.memory.intelligent_memory_system import IntelligentMemorySystem
-
-memory = IntelligentMemorySystem(persist_directory="data/vectors/semantic_memory")
-
-# 查詢 API 設計模式
-api_patterns = memory.query(
-    "[API 設計] RESTful 分頁 過濾 最佳實踐",
-    n_results=5,
-    where={"expert": "xiaohou", "type": "backend_pattern"}
-)
-```
-
-**✅ 新 API (v2.0-universal)**:
 ```python
 from integrations.memory_hub import MemoryHub
-from integrations.universal_memory_storage import StorageCapability
-
 hub = MemoryHub()
 
-# 檢查能力
-if hub.capability == StorageCapability.FULL:
-    print("✅ EvoMem 可用 - 完整語義搜尋功能")
-else:
-    print("⚠️ EvoMem 不可用 - 降級到 JSON 基礎模式")
-
-# 查詢 API 設計模式（智能路由）
-api_patterns = hub.intelligent_query(
-    query="[API 設計] RESTful 分頁 過濾 最佳實踐",
-    agent_type="xiaohou",  # 替代 where={"expert": "xiaohou"}
+# 查詢歷史後端模式
+backend_patterns = hub.intelligent_query(
+    query="[API 設計] RESTful 分頁 過濾 排序",
+    agent_type="xiaohou",
     n_results=5
+)
+
+# 儲存後端經驗
+hub.add_memory(
+    content="[API 設計] 使用複合索引優化多條件查詢，效能提升 10x",
+    expert="xiaohou",
+    memory_type="backend_pattern",
+    tags=["postgresql", "composite_index", "optimization"]
 )
 ```
 
@@ -343,103 +316,6 @@ celery_patterns = hub.intelligent_query(
 
 ---
 
-## 🧠 EvoMem 整合 - v2.0 完整工作流程
-
-### 完整開發工作流程範例
-
-```python
-from integrations.memory_hub import MemoryHub
-
-hub = MemoryHub()
-
-# ========================================
-# Step 1: 開發前 - 查詢歷史經驗
-# ========================================
-
-print("🔍 Step 1: 查詢歷史後端經驗...")
-
-# 查詢 API 設計模式
-api_patterns = hub.intelligent_query(
-    query="[API 設計] RESTful 分頁 過濾 排序 最佳實踐",
-    agent_type="xiaohou",
-    n_results=5
-)
-
-# 查詢資料庫優化
-db_optimization = hub.intelligent_query(
-    query="[PostgreSQL] N+1 Problem 索引優化 解決方案",
-    agent_type="xiaohou",
-    n_results=5
-)
-
-# 查詢認證授權
-auth_patterns = hub.intelligent_query(
-    query="[JWT] 認證 Refresh Token 實作經驗",
-    agent_type="xiaohou",
-    n_results=3
-)
-
-print(f"找到 {len(api_patterns)} 條 API 模式")
-print(f"找到 {len(db_optimization)} 條資料庫優化經驗")
-print(f"找到 {len(auth_patterns)} 條認證授權經驗")
-
-# ========================================
-# Step 2: 開發中 - 參考歷史模式實作
-# ========================================
-
-print("\n💻 Step 2: 基於歷史經驗實作後端功能...")
-
-# 實作 API（參考歷史模式）
-# 實作資料庫 Schema（參考優化經驗）
-# 實作認證授權（參考安全模式）
-
-# ========================================
-# Step 3: 開發後 - 儲存經驗
-# ========================================
-
-print("\n📝 Step 3: 儲存後端經驗到 EvoMem...")
-
-# 儲存 API 設計經驗
-hub.add_memory(
-    content="[API 設計] 使用複合索引優化多條件查詢: idx_papers_user_status_created (user_id, status, created_at DESC)。效能提升 10x。",
-    expert="xiaohou",
-    memory_type="backend_pattern",
-    project="LiteratureManager",
-    tags=["postgresql", "composite_index", "query_optimization"]
-)
-
-# 儲存錯誤處理經驗
-hub.add_memory(
-    content="[錯誤處理] FastAPI 全域例外處理器統一錯誤格式: @app.exception_handler(DomainError)。避免洩漏內部錯誤訊息。",
-    expert="xiaohou",
-    memory_type="backend_pattern",
-    project="LiteratureManager",
-    tags=["fastapi", "exception", "security"]
-)
-
-# 儲存快取策略經驗
-hub.add_memory(
-    content="[快取] 論文列表使用 Redis 快取（TTL 5分鐘），新增/更新論文時清除 pattern: papers:user:{user_id}:*",
-    expert="xiaohou",
-    memory_type="backend_pattern",
-    project="LiteratureManager",
-    tags=["redis", "caching", "invalidation"]
-)
-
-print("✅ 後端經驗已儲存！")
-
-# ========================================
-# Step 4: 查看統計資訊
-# ========================================
-
-stats = hub.get_statistics()
-print(f"\n📊 MemoryHub 統計:")
-print(f"  總查詢次數: {stats['total_queries']}")
-print(f"  快取命中率: {stats['cache_hit_rate']:.1%}")
-print(f"  平均延遲: {stats['avg_latency_ms']:.1f}ms")
-```
-
----
 
 ## 🎨 召喚場景（保留）
 
@@ -553,29 +429,8 @@ print(f"  平均延遲: {stats['avg_latency_ms']:.1f}ms")
 
 ---
 
-## 📊 升級效益總結
-
-| 特性 | v1.0 | v2.0-universal | 改善 |
-|------|------|---------------|------|
-| **記憶系統** | IntelligentMemorySystem（硬編碼） | MemoryHub（可插拔） | ✅ 解耦合 |
-| **後端相容性** | 🔴 緊耦合 EvoMem | 🟢 自動降級 | ↑ 80% |
-| **可測試性** | 🟡 需實際 DB | 🟢 可 Mock | ↑ 60% |
-| **查詢快取** | ❌ 無 | ✅ 50%+ 命中 | 新增 |
-| **品質評分** | ❌ 無 | ✅ 0-100 分 | 新增 |
-| **智能推薦** | ❌ 無 | ✅ 主動推薦 | 新增 |
-| **查詢延遲** | 45ms | 60ms (+33%) | 可接受 |
-
 ---
 
-**召喚小後 v2.0**: 當您需要設計 API、實作後端架構、優化資料庫效能時
-**期待輸出**: OpenAPI Spec、Clean Architecture 程式碼、高效能資料庫 Schema、完整測試 + **儲存到 EvoMem 的經驗**
-
----
-
-*Version: 2.0-universal*
-*Upgraded From: 1.0*
-*Upgrade Date: 2025-11-16*
-*Integration: Universal Memory Storage v2.0.0 + MemoryHub*
-*Token Cost: ~2,800 tokens*
-*Maintainer: EvoMem Team + Multi-Expert Team*
-*Design Pattern: Clean Architecture + API-First (2025 Best Practice)*
+**Version**: 2.0-universal
+**Last Updated**: 2025-11-16
+**Maintainer**: EvoMem Team
