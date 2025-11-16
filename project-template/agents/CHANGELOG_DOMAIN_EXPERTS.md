@@ -1,5 +1,63 @@
 # 領域專家升級 CHANGELOG
 
+## 2025-11-16 - xiaoyun (DevOps) v2.0-universal
+
+### 變更摘要
+
+對小運 (DevOps Expert) 專家文檔進行大幅簡化，移除冗長的範例與重複內容，讓文檔更簡潔易讀。
+
+### 簡化內容
+
+#### 移除部分
+- **詳細 CI/CD 配置範例** (~130 行): 移除完整的 GitHub Actions/GitLab CI YAML 配置
+- **詳細 Docker/K8s 配置** (~200 行): 移除完整的 Dockerfile/Docker Compose/K8s manifests
+- **詳細 Terraform 範例** (~95 行): 移除完整的 Terraform 配置代碼
+- **詳細 Prometheus 配置** (~76 行): 移除完整的 prometheus.yml + alerts.yml
+- **詳細 Grafana 儀表板** (~42 行): 移除完整的 Grafana dashboard JSON
+- **舊 EvoMem 整合章節** (~220 行): 移除舊 API 範例與完整工作流程
+
+#### 保留核心內容
+- ✅ YAML frontmatter (metadata)
+- ✅ MemoryHub API 精簡範例 (查詢 + 儲存)
+- ✅ 核心能力矩陣 (4 個 Level)
+- ✅ CI/CD 核心階段 (Test → Build → Deploy)
+- ✅ 部署策略 (Rolling/Blue-Green/Canary)
+- ✅ Docker 最佳實踐檢查清單
+- ✅ K8s 核心資源 (Deployment/Service/ConfigMap/Secret)
+- ✅ Terraform 核心資源列表
+- ✅ Golden Signals 監控框架
+- ✅ 召喚場景 (4 個場景)
+- ✅ DevOps 檢查清單
+- ✅ 最佳實踐 (Do's & Don'ts)
+- ✅ 推薦工具列表
+- ✅ 版本歷史
+
+### 簡化前後對比
+
+| 檔案 | 精簡前 | 精簡後 | 減少 |
+|------|-------|-------|------|
+| xiaoyun-devops.md | 940 行 | 378 行 | **-60%** |
+
+### 核心改進細節
+
+#### CI/CD 簡化
+- **移除**: 130 行完整 GitHub Actions/GitLab CI YAML
+- **保留**: Pipeline 核心階段 + 部署策略選擇指南
+
+#### 容器化簡化
+- **移除**: 200 行完整 Dockerfile/Docker Compose/K8s manifests
+- **保留**: Docker 最佳實踐 + K8s 核心配置 + 容器安全檢查清單
+
+#### Infrastructure as Code 簡化
+- **移除**: 95 行完整 Terraform 配置
+- **保留**: 核心資源類型 + 標準工作流程 + 成本預估參考
+
+#### 監控與告警簡化
+- **移除**: 118 行 Prometheus/Grafana 詳細配置
+- **保留**: Golden Signals 框架 + 核心告警規則 + 監控工具組合
+
+---
+
 ## 2025-11-16 - xiaopin (Product Manager) v2.0-universal
 
 ### 變更摘要
@@ -138,7 +196,10 @@ hub.add_memory(
 
 ### 專家列表
 
-**Product & Growth Experts**:
+**DevOps & Infrastructure**:
+- 小運 (xiaoyun-devops) - DevOps 專家
+
+**Product & Growth**:
 - 小品 (xiaopin-product) - 產品經理專家
 
 ---
